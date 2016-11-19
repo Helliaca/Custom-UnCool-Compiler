@@ -108,14 +108,14 @@ public class LexScanner implements Lexer {
 	private boolean skipUntil(char[] chars) {
 		if (c == '\n')
 			newLine();
-		else if (c == '\0')
+		else if (eof)
 			return false; // Couldn't find it :(
 		if (arrayContains(chars, c)) { // Check if we are looking for c itsself
 			c = saveAndNext(c);
 			return true;
 		} else { // Move on
 			while (!arrayContains(chars, c)) {
-				if (c == '\0')
+				if (eof)
 					return false;
 				c = saveAndNext(c);
 			}
