@@ -36,7 +36,7 @@ public class LexScanner implements Lexer {
 		saved = "";
 		pos = 0;
 		bytes = 0;
-		line = 0;
+		line = 1;
 		buffer = new char[BufSize];
 
 		// create a new reader
