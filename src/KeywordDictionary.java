@@ -41,7 +41,7 @@ public class KeywordDictionary {
 				else
 					return new Token(tnames.ERROR, s);
 			}
-			return new Token(tnames.CONSTANT, s);
+			return new Token(tnames.CONSTANT, Integer.valueOf(s));
 		}
 
 		// If none of the above, check if it is a string literal
