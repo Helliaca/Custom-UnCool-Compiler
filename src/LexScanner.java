@@ -52,14 +52,16 @@ public class LexScanner implements Lexer {
 
 	@Override
 	public Token nextToken() {
-		if (eof)
-			return new Token(tnames.EOF);
+
 		// Skip all whitespaces etc.
 		while (arrayContains(ignore, c)) {
 			if (c == '\n')
 				newLine();
 			c = next();
 		}
+
+		if (eof)
+			return new Token(tnames.EOF);
 
 		// Once we have found a relevant character, scan until we hit a
 		// separator-character
