@@ -37,6 +37,7 @@ public enum tnames {
 	TYPEID("", "TYPE IDENTIFIER"),
 	
 	//Symbols:
+	DOT(".", "SYMBOL"),
 	COLON(":", "SYMBOL"),
 	SEMI(";", "SYMBOL"),
 	COMMA(",", "SYMBOL"),
