@@ -18,6 +18,9 @@ public class KeywordDictionary {
 		// corresponding token
 		tnames ret = getKey(s);
 
+		if(ret != null)
+			return new Token(ret);
+
 		// If string does not correspond to a lexeme but is valid name, return identifier
 		if (ret == null && SourceVersion.isName(s)) {
 			if (Character.isUpperCase(s.charAt(0)))
@@ -49,11 +52,9 @@ public class KeywordDictionary {
 		}
 
 		// If none of the above, the lexeme is invalid. Return null.
-		else if (ret == null) {
+		else {
 			return new Token(tnames.ERROR, s);
 		}
-
-		return new Token(ret);
 	}
 
 	public tnames getKey(String s) {
