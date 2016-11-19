@@ -5,32 +5,38 @@ import java.io.IOException;
 
 public class LexScanner implements Lexer {
 
-	private char[] buffer;			//Buffer that stores current chuck of source-text being read.
-	private int pos;				//Current position in the buffer being read
-	private int bytes;				//Amount of Bytes in the buffer
-	private int line;				//Stores current line-number that is being read
-	private boolean eof;			//Stores whether if we have reached the end of the file or not
-	private KeywordDictionary kwd;	//Dictionary that contains all tokens with their corresponding lexemes
-	private BufferedReader br; 		//Used to read lines from file
-	final int BufSize = 4096;		//Size of buffer
-	private String saved;			//Stores currently read lexeme
-	private char c;					//Stores character right after 'saved'
-	
-	//Contains all characters that indicate that a lexeme *might* have come to an end
-	static char[] separators = {'\r','\0','\n','\t', '\f', ' ', '+', '-', '*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']', ')', '"'};
-	//Contains all characters inbetween lexemes that can be safely ignored
-	static char[] ignore = {' ', '\t','\n','\r', '\f'};
-	//Contains all Tokens that don't need to be returned by the nextToken-method
-	static tnames[] doNotReturn = {tnames.COMMENT};
-	
-	
+	private char[] buffer;      // Buffer that stores current chuck of source-text
+	                            // being read.
+	private int pos;            // Current position in the buffer being read
+	private int bytes;          // Amount of Bytes in the buffer
+	private int line;           // Stores current line-number that is being read
+	private boolean eof;        // Stores whether if we have reached the end of the
+	                            // file or not
+	private KeywordDictionary kwd;      // Dictionary that contains all tokens with
+	                                    // their corresponding lexemes
+	private BufferedReader br;          // Used to read lines from file
+	final int BufSize = 4096;           // Size of buffer
+	private String saved;               // Stores currently read lexeme
+	private char c;                     // Stores character right after 'saved'
+
+	// Contains all characters that indicate that a lexeme *might* have
+	// come to an end
+	static char[] separators = { '\r', '\0', '\n', '\t', '\f', ' ', '+', '-',
+			'*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']',
+			')', '"' };
+	// Contains all characters inbetween lexemes that can be safely ignored
+	static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
+	// Contains all Tokens that don't need to be returned by the
+	// nextToken-method
+	static tnames[] doNotReturn = { tnames.COMMENT };
+
 	public LexScanner(String file) {
 		kwd = new KeywordDictionary();
 		kwd.Initialize();
 		saved = "";
 		pos = 0;
 		bytes = 0;
-		line=0;
+		line = 0;
 		buffer = new char[BufSize];
 
 		// create a new reader
@@ -44,71 +50,80 @@ public class LexScanner implements Lexer {
 		readChunk();
 		c = next();
 	}
-	
-	
+
 	@Override
 	public Token nextToken() {
-		if(eof) return new Token(tnames.EOF);
-		//Skip all whitespaces etc.
+		if (eof)
+			return new Token(tnames.EOF);
+		// Skip all whitespaces etc.
 		while (arrayContains(ignore, c)) {
-			if (c == '\n') newLine();
+			if (c == '\n')
+				newLine();
 			c = next();
 		}
-		
-		//Once we have found a relevant character, scan until we hit a separator-character
+
+		// Once we have found a relevant character, scan until we hit a
+		// separator-character
 		skipUntil(separators);
-		Token t = kwd.getToken(saved);	//Let's see what we found
-		
+		Token t = kwd.getToken(saved); // Let's see what we found
+
 		// --- SPECIAL CASES: ---
 		{
-			//If we found a minus-char, check if it is a comment
-			if(t.name==tnames.SUB && c=='-') {
-				skipUntil(new char[] {'\n'});		//If so, skip and discard the entire line
+			// If we found a minus-char, check if it is a comment
+			if (t.name == tnames.SUB && c == '-') {
+				skipUntil(new char[] { '\n' }); // If so, skip and discard the
+												// entire line
 				newLine();
 				t = new Token(tnames.COMMENT);
 				c = next();
 			}
-			//If we found a quotation-mark, get the string literal
-			else if(t.name==tnames.QUOTATIONMARK) {
-				if(c=='"') { t = kwd.getToken("\"\""); } 			//Case "" requires special treatment due to the nature of skipUntil
+			// If we found a quotation-mark, get the string literal
+			else if (t.name == tnames.QUOTATIONMARK) {
+				if (c == '"') {
+					t = kwd.getToken("\"\"");
+				} // Case "" requires special treatment due to the nature of
+					// skipUntil
 				else {
-					if(!skipUntil(new char[] {'"'}))				//Look for the next quotation-mark
-						return new Token(tnames.ERROR, saved);		//If there is none, complain
+					if (!skipUntil(new char[] { '"' })) // Look for the next quotation-mark
+						return new Token(tnames.ERROR, saved); // If there is none, complain
 					c = saveAndNext(c);
 					t = kwd.getToken(saved);
 				}
 			}
-			//If we found a '<', it could be <-, <= or <
-			else if(t.name==tnames.LT && kwd.getToken(saved+c).name!=tnames.ERROR) { //Check if the Dictionary contains something for saved+c
-				c = saveAndNext(c);;
+			// If we found a '<', it could be <-, <= or <
+			else if (t.name == tnames.LT && kwd.getToken(saved + c).name != tnames.ERROR) {
+				c = saveAndNext(c);
 				t = kwd.getToken(saved);
 			}
 		}
-		
-		saved = "";	//Reset saved
-		if(arrayContains(doNotReturn, t.name)) t = nextToken(); //Get the next Token if we ought to ignore this one
+
+		saved = ""; // Reset saved
+		if (arrayContains(doNotReturn, t.name))
+			t = nextToken(); // Get the next Token if we ought to ignore this one
 		return t;
-		
+
 	}
-	
-	
-	//Will move c further in the buffer until a character in chars or \0 is found.
+
+	// Will move c further in the buffer until a character in chars or \0 is
+	// found.
 	private boolean skipUntil(char[] chars) {
-		if(c=='\n') newLine();
-		else if(c=='\0') return false; 	//Couldn't find it :(
-		if(arrayContains(chars, c)) {	//Check if we are looking for c itsself
+		if (c == '\n')
+			newLine();
+		else if (c == '\0')
+			return false; // Couldn't find it :(
+		if (arrayContains(chars, c)) { // Check if we are looking for c itsself
 			c = saveAndNext(c);
 			return true;
-		} else {						//Move on
-			while(!arrayContains(chars, c)) {
-				if(c=='\0') return false;
+		} else { // Move on
+			while (!arrayContains(chars, c)) {
+				if (c == '\0')
+					return false;
 				c = saveAndNext(c);
-			} 
+			}
 		}
 		return true;
 	}
-	
-	
+
 	// Read the next part of the input file into the buffer.
 	private void readChunk() {
 		try {
@@ -121,20 +136,17 @@ public class LexScanner implements Lexer {
 		}
 	}
 
-	
-	//Save the paramter to 'saved' and return next character
+	// Save the paramter to 'saved' and return next character
 	private char saveAndNext(char x) {
 		save(x);
 		return next();
 	}
-	
-	
-	//Append paramter to saved
+
+	// Append paramter to saved
 	private void save(char x) {
 		saved += x;
 	}
-	
-	
+
 	// Returns the current character and advances the input stream.
 	private char next() {
 		if (eof) {
@@ -150,27 +162,27 @@ public class LexScanner implements Lexer {
 		}
 		return c;
 	}
-	
-	
+
 	@Override
 	public int linenumber() {
 		return line;
 	}
-	
-	
+
 	private void newLine() {
 		line++;
 	}
 
-	
 	private <A> boolean arrayContains(A[] arr, A obj) {
-		for(A a : arr) if(a==obj) return true;
+		for (A a : arr)
+			if (a == obj)
+				return true;
 		return false;
 	}
-	
-	
+
 	private boolean arrayContains(char[] arr, char obj) {
-		for(char a : arr) if(a==obj) return true;
+		for (char a : arr)
+			if (a == obj)
+				return true;
 		return false;
 	}
 
