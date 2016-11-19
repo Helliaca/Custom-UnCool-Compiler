@@ -27,8 +27,8 @@ public class Main {
 				line = ls.linenumber();
 				System.out.println();
 			}
-			System.out.print(line + ": " + t.toString() + " ");
-		} while (t.name != tnames.EOF && t.name != tnames.ERROR);
+			if(t!=null) System.out.print(line + ": " + t.toString() + " ");
+		} while (t != null && t.name != tnames.EOF);
 
 	}
 

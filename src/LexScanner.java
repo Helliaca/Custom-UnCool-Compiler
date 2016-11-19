@@ -83,7 +83,7 @@ public class LexScanner implements Lexer {
 					// skipUntil
 				else {
 					if (!skipUntil(new char[] { '"' })) // Look for the next quotation-mark
-						return new Token(tnames.ERROR, saved); // If there is none, complain
+						return error(saved); // If there is none, complain
 					c = saveAndNext(c);
 					t = kwd.getToken(saved);
 				}
@@ -98,6 +98,8 @@ public class LexScanner implements Lexer {
 		saved = ""; // Reset saved
 		if (arrayContains(doNotReturn, t.name))
 			t = nextToken(); // Get the next Token if we ought to ignore this one
+		if(t.name == tnames.ERROR)
+			return error(t.attr.toString());
 		return t;
 
 	}
@@ -118,6 +120,12 @@ public class LexScanner implements Lexer {
 			}
 		}
 		return true;
+	}
+	
+	//Prints error message and returns null
+	private Token error(String s) {
+		System.out.println("Error at line " + line + ": " + s);
+		return null;
 	}
 
 	// Read the next part of the input file into the buffer.
