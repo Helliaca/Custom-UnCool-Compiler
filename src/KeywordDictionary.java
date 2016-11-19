@@ -1,8 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.lang.model.SourceVersion;
-
 public class KeywordDictionary {
 
 	Map<String, tnames> dict = new HashMap<String, tnames>();
@@ -22,7 +20,12 @@ public class KeywordDictionary {
 			return new Token(ret);
 
 		// If string does not correspond to a lexeme but is valid name, return identifier
-		if (ret == null && SourceVersion.isName(s)) {
+		if (Character.isLetter(s.charAt(0))) {
+			char[] buf = s.toCharArray();
+			for (char c : buf) {
+				if (! (Character.isLetter(c) || Character.isDigit(c) || c == '_'))
+					return new Token(tnames.ERROR, s);
+			}
 			if (Character.isUpperCase(s.charAt(0)))
 				return new Token(tnames.TYPEID, s);
 			return new Token(tnames.ID, s); // TODO: Write new id into symbol table
