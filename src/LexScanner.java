@@ -54,11 +54,8 @@ public class LexScanner implements Lexer {
 	public Token nextToken() {
 
 		// Skip all whitespace etc.
-		while (arrayContains(ignore, c)) {
-			if (c == '\n')
-				newLine();
+		while (arrayContains(ignore, c)) 
 			c = next();
-		}
 
 		if (eof)
 			return new Token(tnames.EOF);
@@ -108,9 +105,7 @@ public class LexScanner implements Lexer {
 	// Will move c further in the buffer until a character in chars or \0 is
 	// found.
 	private boolean skipUntil(char[] chars) {
-		if (c == '\n')
-			newLine();
-		else if (eof)
+		if (eof)
 			return false; // Couldn't find it :(
 		if (arrayContains(chars, c)) { // Check if we are looking for c itself
 			c = saveAndNext(c);
@@ -161,6 +156,8 @@ public class LexScanner implements Lexer {
 			readChunk();
 			pos = 0;
 		}
+		if (c == '\n')
+			newLine();
 		return c;
 	}
 
