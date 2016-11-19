@@ -20,7 +20,7 @@ public class Main {
 		LexScanner ls = new LexScanner(filename);
 
 		Token t = null;
-		int line = 0;
+		int line = 1;
 		do {
 			t = ls.nextToken();
 			if (ls.linenumber() > line) {
