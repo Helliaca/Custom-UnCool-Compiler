@@ -29,7 +29,7 @@ public class Main {
 				System.out.println();
 			}
 			System.out.print(t.toString() + " ");
-		} while(t.name!=tnames.EOF);
+		} while(t.name != tnames.EOF && t.name != tnames.ERROR);
 			
 
 	}
