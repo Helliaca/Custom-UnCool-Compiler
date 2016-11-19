@@ -24,7 +24,7 @@ public class LexScanner implements Lexer {
 	static char[] separators = { '\r', '\0', '\n', '\t', '\f', ' ', '+', '-',
 			'*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']',
 			')', '"' };
-	// Contains all characters inbetween lexemes that can be safely ignored
+	// Contains all characters in between lexemes that can be safely ignored
 	static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
 	// Contains all Tokens that don't need to be returned by the
 	// nextToken-method
@@ -53,7 +53,7 @@ public class LexScanner implements Lexer {
 	@Override
 	public Token nextToken() {
 
-		// Skip all whitespaces etc.
+		// Skip all whitespace etc.
 		while (arrayContains(ignore, c)) {
 			if (c == '\n')
 				newLine();
@@ -112,7 +112,7 @@ public class LexScanner implements Lexer {
 			newLine();
 		else if (eof)
 			return false; // Couldn't find it :(
-		if (arrayContains(chars, c)) { // Check if we are looking for c itsself
+		if (arrayContains(chars, c)) { // Check if we are looking for c itself
 			c = saveAndNext(c);
 			return true;
 		} else { // Move on
@@ -137,13 +137,13 @@ public class LexScanner implements Lexer {
 		}
 	}
 
-	// Save the paramter to 'saved' and return next character
+	// Save the parameter to 'saved' and return next character
 	private char saveAndNext(char x) {
 		save(x);
 		return next();
 	}
 
-	// Append paramter to saved
+	// Append parameter to saved
 	private void save(char x) {
 		saved += x;
 	}
