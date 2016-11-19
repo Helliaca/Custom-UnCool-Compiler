@@ -26,8 +26,16 @@ public class KeywordDictionary {
 		}
 
 		// If not, check if it is a constant
-		else if (s.matches("\\d+")) {
-			return new Token(tnames.CONSTANT, Integer.valueOf(s));
+		else if (Character.isDigit(s.charAt(0))) {
+			char[] buf = s.toCharArray();
+			int val = 0;
+			for (char c : buf) {
+				if (Character.isDigit(c))
+					val = (val * 10) + Character.getNumericValue(c);
+				else
+					return new Token(tnames.ERROR, s);
+			}
+			return new Token(tnames.CONSTANT, s);
 		}
 
 		// If none of the above, check if it is a string literal
