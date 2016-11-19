@@ -9,6 +9,7 @@ public class LexScanner implements Lexer {
 	                            // being read.
 	private int pos;            // Current position in the buffer being read
 	private int bytes;          // Amount of Bytes in the buffer
+	private int startline;		// Stores line on which the current lexeme starts
 	private int line;           // Stores current line-number that is being read
 	private boolean eof;        // Stores whether if we have reached the end of the
 	                            // file or not
@@ -35,7 +36,7 @@ public class LexScanner implements Lexer {
 		saved = "";
 		pos = 0;
 		bytes = 0;
-		line = 1;
+		line = startline = 1;
 		buffer = new char[BufSize];
 
 		// create a new reader
@@ -59,7 +60,7 @@ public class LexScanner implements Lexer {
 
 		if (eof)
 			return new Token(tnames.EOF);
-
+		startline = line;
 		// Once we have found a relevant character, scan until we hit a
 		// separator-character
 		skipUntil(separators);
@@ -171,7 +172,7 @@ public class LexScanner implements Lexer {
 
 	@Override
 	public int linenumber() {
-		return line;
+		return startline;
 	}
 
 	private void newLine() {
