@@ -17,9 +17,9 @@ public class LexScanner implements Lexer {
 	private char c;					//Stores character right after 'saved'
 	
 	//Contains all characters that indicate that a lexeme *might* have come to an end
-	static char[] separators = {'\r','\0','\n','\t', ' ', '+', '-', '*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']', ')', '"'};
+	static char[] separators = {'\r','\0','\n','\t', '\f', ' ', '+', '-', '*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']', ')', '"'};
 	//Contains all characters inbetween lexemes that can be safely ignored
-	static char[] ignore = {' ', '\t','\n','\r'};
+	static char[] ignore = {' ', '\t','\n','\r', '\f'};
 	//Contains all Tokens that don't need to be returned by the nextToken-method
 	static tnames[] doNotReturn = {tnames.COMMENT};
 	
