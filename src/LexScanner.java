@@ -32,7 +32,6 @@ public class LexScanner implements Lexer {
 
 	public LexScanner(String file) {
 		kwd = new KeywordDictionary();
-		kwd.Initialize();
 		saved = "";
 		pos = 0;
 		bytes = 0;

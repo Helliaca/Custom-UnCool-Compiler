@@ -7,7 +7,7 @@ public class KeywordDictionary {
 
 	Map<String, tnames> dict = new HashMap<String, tnames>();
 
-	public void Initialize() {
+	public KeywordDictionary() {
 		// Write all possible Token-names from tnames into Token-Dictionary
 		for (tnames t : tnames.values())
 			dict.put(t.getLexeme(), t);
