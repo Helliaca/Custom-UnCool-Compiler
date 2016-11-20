@@ -20,14 +20,14 @@ public class Main {
 		LexScanner ls = new LexScanner(filename);
 
 		Token t = null;
-		int line = 1;
+		int line = -1;
 		do {
 			t = ls.nextToken();
 			if (ls.linenumber() > line) {
 				line = ls.linenumber();
-				System.out.println();
+				System.out.print("\n" + line + ": ");
 			}
-			if(t!=null) System.out.print(line + ": " + t.toString() + " ");
+			if(t!=null) System.out.print(t.toString() + " ");
 		} while (t != null && t.name != tnames.EOF);
 
 	}
