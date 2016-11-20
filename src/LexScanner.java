@@ -72,7 +72,6 @@ public class LexScanner implements Lexer {
 			if (t.name == tnames.SUB && c == '-') {
 				skipUntil(new char[] { '\n' }); // If so, skip and discard the
 												// entire line
-				newLine();
 				t = new Token(tnames.COMMENT);
 				c = next();
 			}
