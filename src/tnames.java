@@ -27,15 +27,6 @@ public enum tnames {
 	ELSE("else", "KEYWORD"),
 	WHILE("while", "KEYWORD"),
 	
-	//Types/Classes:
-	IO("IO", "TYPE"),
-	INT("Int", "TYPE"),
-	LIST("List", "TYPE"),
-	BOOL("Bool", "TYPE"),
-	STRING("String", "TYPE"),
-	OBJECT("Object", "TYPE"),
-	TYPEID("", "TYPE IDENTIFIER"),
-	
 	//Symbols:
 	DOT(".", "SYMBOL"),
 	COLON(":", "SYMBOL"),
@@ -49,7 +40,8 @@ public enum tnames {
 	BRACECLOSE("}", "SYMBOL"),
 	QUOTATIONMARK("\"", "SYMBOL"),
 	VOID("void", "SYMBOL"),
-	
+	EXPR("$", "SYMBOL"),
+
 	//Other:
 	CONSTANT("", "CONST"),
 	TRUE("true", "CONST"),
@@ -57,6 +49,7 @@ public enum tnames {
 	COMMENT("", "COMMENT"),
 	STRINGLITERAL("", "LITERAL"),
 	ID("", "IDENTIFIER"),
+	TYPEID("", "TYPE"),
 	EOF("\0", "", "END OF FILE"),
 	ERROR("", "ERROR");
 	
