@@ -55,7 +55,7 @@ public class LexScanner implements Lexer {
 	public Token nextToken() {
 
 		// Skip all whitespace etc.
-		while (arrayContains(ignore, c)) 
+		while (ArrayHelp.arrayContains(ignore, c)) 
 			c = next();
 
 		if (eof)
@@ -96,7 +96,7 @@ public class LexScanner implements Lexer {
 		}
 
 		saved = ""; // Reset saved
-		if (arrayContains(doNotReturn, t.name))
+		if (ArrayHelp.arrayContains(doNotReturn, t.name))
 			t = nextToken(); // Get the next Token if we ought to ignore this one
 		if(t.name == tnames.ERROR)
 			return error(t.attr.toString());
@@ -109,11 +109,11 @@ public class LexScanner implements Lexer {
 	private boolean skipUntil(char[] chars) {
 		if (eof)
 			return false; // Couldn't find it :(
-		if (arrayContains(chars, c)) { // Check if we are looking for c itself
+		if (ArrayHelp.arrayContains(chars, c)) { // Check if we are looking for c itself
 			c = saveAndNext(c);
 			return true;
 		} else { // Move on
-			while (!arrayContains(chars, c)) {
+			while (!ArrayHelp.arrayContains(chars, c)) {
 				if (eof)
 					return false;
 				c = saveAndNext(c);
@@ -176,20 +176,6 @@ public class LexScanner implements Lexer {
 
 	private void newLine() {
 		line++;
-	}
-
-	private <A> boolean arrayContains(A[] arr, A obj) {
-		for (A a : arr)
-			if (a == obj)
-				return true;
-		return false;
-	}
-
-	private boolean arrayContains(char[] arr, char obj) {
-		for (char a : arr)
-			if (a == obj)
-				return true;
-		return false;
 	}
 
 }

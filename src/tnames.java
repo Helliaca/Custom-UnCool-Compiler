@@ -1,4 +1,4 @@
-public enum tnames {
+public enum tnames implements names {
 	//---- INLCUDES ALL POSSIBLE TOKEN-NAMES WITH THEIR RESPECTIVE LEXEME AND TYPE ----
 	
 	//Operators:
@@ -28,12 +28,6 @@ public enum tnames {
 	WHILE("while", "KEYWORD"),
 	
 	//Types/Classes:
-	IO("IO", "TYPE"),
-	INT("Int", "TYPE"),
-	LIST("List", "TYPE"),
-	BOOL("Bool", "TYPE"),
-	STRING("String", "TYPE"),
-	OBJECT("Object", "TYPE"),
 	TYPEID("", "TYPE IDENTIFIER"),
 	
 	//Symbols:
@@ -58,7 +52,11 @@ public enum tnames {
 	STRINGLITERAL("", "LITERAL"),
 	ID("", "IDENTIFIER"),
 	EOF("\0", "", "END OF FILE"),
-	ERROR("", "ERROR");
+	ERROR("", "ERROR"),
+	
+	EXPR("&", "EXPR"),
+	EPSILON("", "EPSILON"),
+	TOKENS("", "TOKENLIST");
 	
 	
 	private final String lexeme;
@@ -87,5 +85,15 @@ public enum tnames {
 	
 	public String getFullName() {
 		return fullName;
+	}
+	
+	@Override
+	public boolean isTnames() {
+		return true;
+	}
+	
+	@Override
+	public tnames[] First(names[] prod) {
+		return new tnames[] {this};
 	}
 }	

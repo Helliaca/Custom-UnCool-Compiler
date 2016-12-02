@@ -17,19 +17,10 @@ public class Main {
 			in.close();
 		}
 
-		LexScanner ls = new LexScanner(filename);
-
-		Token t = null;
-		int line = -1;
-		do {
-			t = ls.nextToken();
-			if (ls.linenumber() > line) {
-				line = ls.linenumber();
-				System.out.print("\n" + line + ": ");
-			}
-			if(t!=null) System.out.print(t.toString() + " ");
-		} while (t != null && t.name != tnames.EOF);
-
+		
+		Node root = new Parser(new LexScanner(filename)).parse();
+		System.out.println(root.toString());
+		
 	}
 
 }
