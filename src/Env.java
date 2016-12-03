@@ -11,7 +11,7 @@ public class Env {
 		ClassInfo parent;
 		List<VarInfo> vars;
 		List<MethInfo> methods;
-		
+
 		ClassInfo(String name, ClassInfo parent) {
 			this.name = name;
 			this.parent = parent;
@@ -24,7 +24,7 @@ public class Env {
 	private class VarInfo {
 		String name;
 		ClassInfo type;
-		
+
 		VarInfo(String name, ClassInfo type) {
 			this.name = name;
 			this.type = type;
@@ -36,14 +36,14 @@ public class Env {
 		String name;
 		ClassInfo type;
 		List<ClassInfo> params;
-		
-		MethInfo(String name, List<ClassInfo> params, ClassInfo type){
+
+		MethInfo(String name, List<ClassInfo> params, ClassInfo type) {
 			this.name = name;
 			this.type = type;
 			this.params = params;
 		}
 	}
-	
+
 	HashMap<String, ClassInfo> classTable;
 
 	public Env() {
@@ -61,22 +61,33 @@ public class Env {
 		classTable.put("Bool", bool);
 	}
 
+	// Prints msg and quits the program.
+	private void fail(String msg) {
+		System.out.println("Error: " + msg);
+		System.exit(-1);
+	}
+
+	// Fail if the type doesn't exist, or return the corresponding
+	// ClassInfo object.
+	private ClassInfo verifyType(String type) {
+		ClassInfo ci = classTable.get(type);
+		if (ci == null) {
+			fail("Class " + type + " is undefined.");
+		}
+		return ci;
+	}
+
 	// Add a class to the environment.
 	public void addClass(String name, String parent) {
 		ClassInfo c = classTable.get(name);
 		ClassInfo p;
 		// Check if there is a class called name.
 		if (c != null) {
-			System.out.println("Error: " + name + " is already defined.");
-			System.exit(-1);
+			fail("Class " + name + " already exists");
 		}
 		if (parent != null) {
 			// Check if the inherited class exists.
-			p = classTable.get(parent);
-			if (p == null) {
-				System.out.println("Error: " + parent + " is not defined.");
-				System.exit(-1);
-			}
+			p = verifyType(parent);
 		} else {
 			p = object; // By default, classes inherit from object.
 		}
@@ -84,15 +95,14 @@ public class Env {
 	}
 
 	// Check if the variable name already exists.
-	private void checkVar(ClassInfo klass, String name){
-		if(klass == object)
+	private void checkVar(ClassInfo klass, String name) {
+		if (klass == object)
 			return;
 
-		for(VarInfo vi : klass.vars){
-			if (vi.name.equals(name)){
-				System.out.println("Error: Varibale " + name +
-						" has already be defined in class " + klass.name);
-				System.exit(-1);
+		for (VarInfo vi : klass.vars) {
+			if (vi.name.equals(name)) {
+				fail("Error: Varibale " + name
+						+ " has already be defined in class " + klass.name);
 			}
 		}
 		// Check if we inherited a variable called name.
@@ -104,82 +114,72 @@ public class Env {
 		ClassInfo k;
 		ClassInfo vType;
 		VarInfo v;
-		
+
 		// Check if the variables type exists.
-		vType = classTable.get(type);
-		if(vType == null){
-			System.out.println("Error: Class " + vType + " does not exist.");
-			System.exit(-1);
-		}
+		vType = verifyType(type);
 		v = new VarInfo(name, vType);
-		k = classTable.get(klass);
+		k = verifyType(klass);
 		// Check if the variable is already defined.
 		checkVar(k, name);
 		k.vars.add(v);
 	}
-	
+
 	// Check if the method declaration is valid.
-	private void checkMeth(ClassInfo klass, String name, List<ClassInfo> params, ClassInfo type){
-		if(klass == object)
+	private void checkMeth(ClassInfo klass, String name,
+			List<ClassInfo> params, ClassInfo type) {
+		if (klass == object)
 			return;
-		
+
 		// For all methods in the class ...
-		for(MethInfo mi : klass.methods){
+		for (MethInfo mi : klass.methods) {
 			// TODO: redefinition in same class
-			if(mi.name.equals(name)){
+			if (mi.name.equals(name)) {
 				// We found a method with the same name.
 				// Check the return type.
-				if(mi.type != type){
+				if (mi.type != type) {
 					System.out.println("Error: Attempt to overwrite " + name
 							+ " but return type is wrong.");
 					System.exit(-1);
 				}
 				// Check the number of arguments.
-				if(mi.params.size() != params.size()){
+				if (mi.params.size() != params.size()) {
 					System.out.println("Error: Attempt to overwrite " + name
 							+ " but number of arguments is wrong.");
 					System.exit(-1);
 				}
 				// Compare parameter types.
-				for(int i = 0; i < params.size(); i++){
-					if(mi.params.get(i) != params.get(i)){
-						System.out.println("Error: Attempt to overwrite " + name
-								+ " but parameter types are wrong.");
+				for (int i = 0; i < params.size(); i++) {
+					if (mi.params.get(i) != params.get(i)) {
+						System.out.println("Error: Attempt to overwrite "
+								+ name + " but parameter types are wrong.");
 					}
 				}
 			}
 		}
 		checkMeth(klass.parent, name, params, type);
 	}
-	
+
 	// Add a method the environment.
-	public void addMethod(String klass, String name, List<String> params, String type) {
+	public void addMethod(String klass, String name, List<String> params,
+			String type) {
 		ClassInfo k;
 		ClassInfo retType;
 		ClassInfo pType;
 		List<ClassInfo> ps = new ArrayList<>();
 		MethInfo m;
-		
+
 		// Check if the return type exists.
-		retType = classTable.get(type);
-		if(retType == null) {
-			System.out.println("Error: Class " + retType + " does not exist.");
-			System.exit(-1);
-		}
+		retType = verifyType(type);
 		// Check if the parameter types exist.
 		for (String t : params) {
-			pType = classTable.get(t);
-			if(pType == null) {
-				System.out.println("Error: Class " + pType + " does not exist.");
-				System.exit(-1);
-			}
+			pType = verifyType(t);
 			ps.add(pType);
 		}
 		k = classTable.get(klass);
 		// Check if the declaration is valid.
 		checkMeth(k, name, ps, retType);
 		m = new MethInfo(name, ps, retType);
-		
+
 		k.methods.add(m);
 	}
 
