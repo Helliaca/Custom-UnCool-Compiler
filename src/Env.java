@@ -2,8 +2,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.oracle.xmlns.internal.webservices.jaxws_databinding.ExistingAnnotationsType;
-
 public class Env {
 	ClassInfo object;
 
@@ -33,7 +31,7 @@ public class Env {
 		}
 	}
 
-	// Stores information about Methods.
+	// Stores information about methods.
 	private class MethInfo {
 		String name;
 		ClassInfo type;
