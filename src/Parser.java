@@ -123,20 +123,8 @@ public class Parser {
 		// method: name([arg : type, ...]) : type { expr };
 		match(tnames.BRACKETOPEN);
 		// have: name (
-		while (matches(tnames.ID)) {
-			String t = null;
-
-			match(tnames.ID); // We don't care about the name of the params.
-			match(tnames.COLON);
-
-			t = match(tnames.TYPEID);
-			// Collect the parameter types in a list.
-			params.add(t);
-			if (matches(tnames.COMMA)) {
-				match(tnames.COMMA);
-			} else {
-				break;
-			}
+		if (!matches(tnames.BRACKETCLOSE)) {
+			parameters(params);
 		}
 		// have: name([arg:type, ..]
 		match(tnames.BRACKETCLOSE);
@@ -151,8 +139,24 @@ public class Parser {
 		match(tnames.SEMI);
 
 	}
+
+	// Parse the parameters list of a method.
+	private void parameters(List<String> params) {
+		String type;
+
+		match(tnames.ID);
+		match(tnames.COLON);
+		type = match(tnames.TYPEID);
+		params.add(type);
+		if (matches(tnames.COMMA)) {
+			match(tnames.COMMA);
+			parameters(params);
+		}
+		return;
+	}
+
 	// Parse an expression.
-	private void expr(){
+	private void expr() {
 		match(tnames.EXPR);
 	}
 }
