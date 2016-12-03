@@ -107,7 +107,7 @@ public class Parser {
 
 		if (matches(tnames.ASSIGN)) {
 			match(tnames.ASSIGN);
-			match(tnames.EXPR);
+			expr();
 		}
 		// Add the variable to the environment.
 		env.addVar(klass, name, type);
@@ -146,9 +146,13 @@ public class Parser {
 		env.addMethod(klass, name, params, type);
 		// have: name([arg:type, ..]) : Type
 		match(tnames.BRACEOPEN);
-		match(tnames.EXPR);
+		expr();
 		match(tnames.BRACECLOSE);
 		match(tnames.SEMI);
 
+	}
+	// Parse an expression.
+	private void expr(){
+		match(tnames.EXPR);
 	}
 }
