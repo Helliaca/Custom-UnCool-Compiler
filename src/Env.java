@@ -6,7 +6,7 @@ public class Env {
 	ClassInfo object;
 
 	// Stores information about classes
-	private class ClassInfo {
+	class ClassInfo {
 		String name;
 		ClassInfo parent;
 		List<VarInfo> vars;
@@ -21,7 +21,7 @@ public class Env {
 	}
 
 	// Stores information about variables.
-	private class VarInfo {
+	class VarInfo {
 		String name;
 		ClassInfo type;
 
@@ -32,7 +32,7 @@ public class Env {
 	}
 
 	// Stores information about methods.
-	private class MethInfo {
+	class MethInfo {
 		String name;
 		ClassInfo type;
 		List<ClassInfo> params;
@@ -78,9 +78,11 @@ public class Env {
 	}
 
 	// Add a class to the environment.
-	public void addClass(String name, String parent) {
-		ClassInfo c = classTable.get(name);
+	Env.ClassInfo addClass(String name, String parent) {
+		ClassInfo ci;
 		ClassInfo p;
+		ClassInfo c = classTable.get(name);
+
 		// Check if there is a class called name.
 		if (c != null) {
 			fail("Class " + name + " already exists");
@@ -91,7 +93,9 @@ public class Env {
 		} else {
 			p = object; // By default, classes inherit from object.
 		}
-		classTable.put(name, new ClassInfo(name, p));
+		ci = new ClassInfo(name, p);
+		classTable.put(name, ci);
+		return ci;
 	}
 
 	// Check if the variable name already exists.
@@ -101,8 +105,8 @@ public class Env {
 
 		for (VarInfo vi : klass.vars) {
 			if (vi.name.equals(name)) {
-				fail("Error: Varibale " + name
-						+ " has already be defined in class " + klass.name);
+				fail("Varibale " + name + " has already be defined in class "
+						+ klass.name);
 			}
 		}
 		// Check if we inherited a variable called name.
@@ -110,7 +114,7 @@ public class Env {
 	}
 
 	// Add a variable to the environment.
-	public void addVar(String klass, String name, String type) {
+	Env.VarInfo addVar(String klass, String name, String type) {
 		ClassInfo k;
 		ClassInfo vType;
 		VarInfo v;
@@ -122,11 +126,12 @@ public class Env {
 		// Check if the variable is already defined.
 		checkVar(k, name);
 		k.vars.add(v);
+		return v;
 	}
 
 	// Check if the method declaration is valid.
 	private void checkMeth(ClassInfo klass, String name,
-			List<ClassInfo> params, ClassInfo type) {
+			List<ClassInfo> params, ClassInfo type, boolean inherited) {
 		if (klass == object)
 			return;
 
@@ -135,32 +140,33 @@ public class Env {
 			// TODO: redefinition in same class
 			if (mi.name.equals(name)) {
 				// We found a method with the same name.
+				if (inherited == false) {
+					fail("Cannot define method " + name + " twice.");
+				}
 				// Check the return type.
 				if (mi.type != type) {
-					System.out.println("Error: Attempt to overwrite " + name
+					fail("Attempt to overwrite " + name
 							+ " but return type is wrong.");
-					System.exit(-1);
 				}
 				// Check the number of arguments.
 				if (mi.params.size() != params.size()) {
-					System.out.println("Error: Attempt to overwrite " + name
+					fail("Attempt to overwrite " + name
 							+ " but number of arguments is wrong.");
-					System.exit(-1);
 				}
 				// Compare parameter types.
 				for (int i = 0; i < params.size(); i++) {
 					if (mi.params.get(i) != params.get(i)) {
-						System.out.println("Error: Attempt to overwrite "
-								+ name + " but parameter types are wrong.");
+						fail("Attempt to overwrite " + name
+								+ " but parameter types are wrong.");
 					}
 				}
 			}
 		}
-		checkMeth(klass.parent, name, params, type);
+		checkMeth(klass.parent, name, params, type, true);
 	}
 
 	// Add a method the environment.
-	public void addMethod(String klass, String name, List<String> params,
+	Env.MethInfo addMethod(String klass, String name, List<String> params,
 			String type) {
 		ClassInfo k;
 		ClassInfo retType;
@@ -177,10 +183,10 @@ public class Env {
 		}
 		k = classTable.get(klass);
 		// Check if the declaration is valid.
-		checkMeth(k, name, ps, retType);
+		checkMeth(k, name, ps, retType, false);
 		m = new MethInfo(name, ps, retType);
-
 		k.methods.add(m);
+		return m;
 	}
 
 }

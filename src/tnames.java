@@ -40,7 +40,7 @@ public enum tnames {
 	BRACECLOSE("}", "SYMBOL"),
 	QUOTATIONMARK("\"", "SYMBOL"),
 	VOID("void", "SYMBOL"),
-	EXPR("$", "SYMBOL"),
+	EXPR("&", "SYMBOL"),
 
 	//Other:
 	CONSTANT("", "CONST"),

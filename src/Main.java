@@ -18,6 +18,7 @@ public class Main {
 		}
 
 		AST ast = new Parser(new LexScanner(filename)).parse();
+		ast.print();
 	}
 
 }

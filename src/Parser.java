@@ -19,7 +19,7 @@ public class Parser {
 	public AST parse() {
 		// Match class definitions
 		do {
-			klass();
+			klass(ast);
 		} while (matches(tnames.CLASS));
 		// There are no more classes. The input has to end here.
 		match(tnames.EOF);
@@ -42,9 +42,7 @@ public class Parser {
 	// If the current token matches t, eat it and advance. If there is
 	// a mismatch, the method quits the program with an error message.
 	private String match(tnames t) {
-		// TODO: remove the next line
 		Token c = current;
-		System.out.println("matched: " + t);
 		if (current.name == t) {
 			current = lex.nextToken();
 			return (String) c.attr;
@@ -63,9 +61,11 @@ public class Parser {
 	}
 
 	// Parses a class definition.
-	private void klass() {
+	private void klass(AST ast) {
 		String klass = null;
 		String parent = null;
+		Env.ClassInfo ci;
+		AST cast;
 
 		match(tnames.CLASS);
 		klass = match(tnames.TYPEID);
@@ -76,7 +76,8 @@ public class Parser {
 			parent = match(tnames.TYPEID);
 		}
 		// Add the class definition to the environment.
-		env.addClass(klass, parent);
+		ci = env.addClass(klass, parent);
+		cast = ast.addClass(ci);
 
 		match(tnames.BRACEOPEN);
 		// Parse vars and methods.
@@ -84,10 +85,10 @@ public class Parser {
 			String n = match(tnames.ID);
 			if (matches(tnames.COLON)) {
 				// have: Name :
-				var(klass, n);
+				var(cast, klass, n);
 			} else if (matches(tnames.BRACKETOPEN)) {
 				// have: Name (
-				method(klass, n);
+				method(cast, klass, n);
 			} else {
 				quit(tnames.COLON, tnames.BRACKETOPEN);
 			}
@@ -99,24 +100,30 @@ public class Parser {
 
 	// Parse a variable declaration. name is the name of
 	// the variable, klass is the class it's defined in.
-	private void var(String klass, String name) {
+	private void var(AST ast, String klass, String name) {
 		String type = null;
+		Env.VarInfo vi;
+		AST vast;
 
 		match(tnames.COLON);
 		type = match(tnames.TYPEID);
+		// Add the variable to the environment.
+		vi = env.addVar(klass, name, type);
+		vast = ast.addVariable(vi);
 
 		if (matches(tnames.ASSIGN)) {
 			match(tnames.ASSIGN);
-			expr();
+			expr(vast);
 		}
-		// Add the variable to the environment.
-		env.addVar(klass, name, type);
+
 		match(tnames.SEMI);
 	}
 
 	// Parse a method declaration. name is the name of
 	// the method, klass is the class it's defined in.
-	private void method(String klass, String name) {
+	private void method(AST ast, String klass, String name) {
+		AST mast;
+		Env.MethInfo mi;
 		String type;
 		List<String> params = new ArrayList<>();
 
@@ -131,10 +138,12 @@ public class Parser {
 		match(tnames.COLON);
 		// The return type.
 		type = match(tnames.TYPEID);
-		env.addMethod(klass, name, params, type);
+		mi = env.addMethod(klass, name, params, type);
+		mast = ast.addMethod(mi);
+
 		// have: name([arg:type, ..]) : Type
 		match(tnames.BRACEOPEN);
-		expr();
+		expr(mast);
 		match(tnames.BRACECLOSE);
 		match(tnames.SEMI);
 
@@ -156,7 +165,8 @@ public class Parser {
 	}
 
 	// Parse an expression.
-	private void expr() {
+	private void expr(AST ast) {
 		match(tnames.EXPR);
+		ast.addExpr();
 	}
 }
