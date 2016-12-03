@@ -141,8 +141,9 @@ public class Parser {
 			params.add(t);
 			if(matches(tnames.COMMA)) {
 				match(tnames.COMMA);
+			} else {
+				break;
 			}
-			// TODO: error handling (missing comma, comma but no other arg)
 		}
 		// have: name([arg:type, ..]
 		match(tnames.BRACKETCLOSE);
