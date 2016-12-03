@@ -41,14 +41,17 @@ public class Parser {
 
 	// If the current token matches t, eat it and advance. If there is
 	// a mismatch, the method quits the program with an error message.
-	private void match(tnames t) {
+	private String match(tnames t) {
 		// TODO: remove the next line
+		Token c = current;
 		System.out.println("matched: " + t);
 		if (current.name == t) {
 			current = lex.nextToken();
+			return (String) c.attr;
 		} else {
 			quit(t, null);
 		}
+		return null;
 	}
 
 	// Returns true if the current token matches t.
@@ -65,20 +68,12 @@ public class Parser {
 		String parent = null;
 
 		match(tnames.CLASS);
-		// Check for a name and save it.
-		if (matches(tnames.TYPEID)) {
-			klass = (String) current.attr;
-			match(tnames.TYPEID);
-		} else {
-			quit(tnames.TYPEID, null);
-		}
+		klass = match(tnames.TYPEID);
+
 		// Check for the "inherits Type" declaration.
 		if (matches(tnames.INHERITS)) {
 			match(tnames.INHERITS);
-			if (matches(tnames.TYPEID)) {
-				parent = (String) current.attr;
-				match(tnames.TYPEID);
-			}
+			parent = match(tnames.TYPEID);
 		}
 		// Add the class definition to the environment.
 		env.addClass(klass, parent);
@@ -86,11 +81,12 @@ public class Parser {
 		match(tnames.BRACEOPEN);
 		// Parse vars and methods.
 		while (matches(tnames.ID)) {
-			String n = (String) current.attr;
-			match(tnames.ID);
+			String n = match(tnames.ID);
 			if (matches(tnames.COLON)) {
+				// have: Name :
 				var(klass, n);
 			} else if (matches(tnames.BRACKETOPEN)) {
+				// have: Name (
 				method(klass, n);
 			} else {
 				quit(tnames.COLON, tnames.BRACKETOPEN);
@@ -100,16 +96,15 @@ public class Parser {
 		match(tnames.BRACECLOSE);
 		match(tnames.SEMI);
 	}
-	
-	// Parse a variable declaration.
+
+	// Parse a variable declaration. name is the name of
+	// the variable, klass is the class it's defined in.
 	private void var(String klass, String name) {
 		String type = null;
 
 		match(tnames.COLON);
-		if (matches(tnames.TYPEID)) {
-			type = (String) current.attr;
-			match(tnames.TYPEID);
-		}
+		type = match(tnames.TYPEID);
+
 		if (matches(tnames.ASSIGN)) {
 			match(tnames.ASSIGN);
 			match(tnames.EXPR);
@@ -119,7 +114,8 @@ public class Parser {
 		match(tnames.SEMI);
 	}
 
-	// Parse a method declaration.
+	// Parse a method declaration. name is the name of
+	// the method, klass is the class it's defined in.
 	private void method(String klass, String name) {
 		String type;
 		List<String> params = new ArrayList<>();
@@ -132,14 +128,11 @@ public class Parser {
 
 			match(tnames.ID); // We don't care about the name of the params.
 			match(tnames.COLON);
-	
-			if (matches(tnames.TYPEID)) {
-				t = (String) current.attr;
-				match(tnames.TYPEID);
-			}
+
+			t = match(tnames.TYPEID);
 			// Collect the parameter types in a list.
 			params.add(t);
-			if(matches(tnames.COMMA)) {
+			if (matches(tnames.COMMA)) {
 				match(tnames.COMMA);
 			} else {
 				break;
@@ -149,16 +142,13 @@ public class Parser {
 		match(tnames.BRACKETCLOSE);
 		match(tnames.COLON);
 		// The return type.
-		if (matches(tnames.TYPEID)) {
-			type = (String) current.attr;
-			match(tnames.TYPEID);
-			env.addMethod(klass, name, params, type);
-		}
+		type = match(tnames.TYPEID);
+		env.addMethod(klass, name, params, type);
 		// have: name([arg:type, ..]) : Type
 		match(tnames.BRACEOPEN);
 		match(tnames.EXPR);
 		match(tnames.BRACECLOSE);
 		match(tnames.SEMI);
-		
+
 	}
 }
