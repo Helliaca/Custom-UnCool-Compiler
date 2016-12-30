@@ -1,7 +1,7 @@
 public class Token {
 
-	public Tnames name;
-	public Object attr;
+	Tnames name;
+	Object attr;
 
 	public Token(Tnames name, Object attr) {
 		this.name = name;

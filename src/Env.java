@@ -2,8 +2,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Env {
-	ClassInfo object;
+class Env {
+	private ClassInfo object;
 
 	// Stores information about classes
 	class ClassInfo {
@@ -44,9 +44,9 @@ public class Env {
 		}
 	}
 
-	HashMap<String, ClassInfo> classTable;
+	private HashMap<String, ClassInfo> classTable;
 
-	public Env() {
+	Env() {
 		classTable = new HashMap<>();
 		object = new ClassInfo("object", object);
 		ClassInfo io = new ClassInfo("IO", object);
@@ -122,7 +122,7 @@ public class Env {
 		// Check if the variables type exists.
 		vType = verifyType(type);
 		v = new VarInfo(name, vType);
-		k = verifyType(klass); // TODO: remove
+		k = verifyType(klass);
 		// Check if the variable is already defined.
 		checkVar(k, name);
 		k.vars.add(v);
@@ -137,7 +137,6 @@ public class Env {
 
 		// For all methods in the class ...
 		for (MethInfo mi : klass.methods) {
-			// TODO: redefinition in same class
 			if (mi.name.equals(name)) {
 				// We found a method with the same name.
 				if (inherited == false) {

@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser {
+class Parser {
 
 	LexScanner lex;
 	AST ast;
@@ -16,7 +16,7 @@ public class Parser {
 	}
 
 	// Parse the file given to the Lexer-object. Returns an AST.
-	public AST parse() {
+	AST parse() {
 		// Match class definitions
 		do {
 			klass(ast);
@@ -54,15 +54,12 @@ public class Parser {
 
 	// Returns true if the current token matches t.
 	private boolean matches(Tnames t) {
-		if (current.name == t) {
-			return true;
-		}
-		return false;
+		return current.name == t;
 	}
 
 	// Parses a class definition.
 	private void klass(AST ast) {
-		String klass = null;
+		String klass;
 		String parent = null; // TODO: initialize ot object?
 		Env.ClassInfo ci;
 		AST cast;
@@ -161,7 +158,6 @@ public class Parser {
 			match(Tnames.COMMA);
 			parameters(params);
 		}
-		return; // TODO: remove
 	}
 
 	// Parse an expression.

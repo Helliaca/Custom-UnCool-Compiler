@@ -57,7 +57,7 @@ public enum Tnames {
 	private final String lexeme;
 	private final String type;
 
-	private Tnames(String lexeme, String type) {
+	Tnames(String lexeme, String type) {
 		this.lexeme = lexeme;
 		this.type = type;
 	}

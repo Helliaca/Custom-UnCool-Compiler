@@ -5,14 +5,14 @@ public class AST {
 		ROOT, CLASS, METHOD, VARIABLE, EXPR
 	};
 
-	NodeType t;
-	Env.ClassInfo ci;
-	Env.VarInfo vi;
-	Env.MethInfo mi;
-	ArrayList<AST> children;
-	final String indent = "\t";
+	private NodeType t;
+	private Env.ClassInfo ci;
+	private Env.VarInfo vi;
+	private Env.MethInfo mi;
+	private ArrayList<AST> children;
+	private final String indent = "\t";
 
-	public AST() {
+	AST() {
 		t = NodeType.ROOT;
 		ci = null;
 		vi = null;

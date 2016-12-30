@@ -3,7 +3,7 @@ import java.util.Map;
 
 public class KeywordDictionary {
 
-	Map<String, Tnames> dict = new HashMap<String, Tnames>();
+	private Map<String, Tnames> dict = new HashMap<>();
 
 	public KeywordDictionary() {
 		// Write all possible Token-names from Tnames into Token-Dictionary
@@ -11,7 +11,7 @@ public class KeywordDictionary {
 			dict.put(t.getLexeme(), t);
 	}
 
-	public Token getToken(String s) {
+	Token getToken(String s) {
 		// If string corresponds to a lexeme in the dictionary, return
 		// corresponding token
 		Tnames ret = getKey(s);
@@ -28,7 +28,7 @@ public class KeywordDictionary {
 			}
 			if (Character.isUpperCase(s.charAt(0)))
 				return new Token(Tnames.TYPEID, s);
-			return new Token(Tnames.ID, s); // TODO: Write new id into symbol table
+			return new Token(Tnames.ID, s);
 		}
 
 		// If not, check if it is a constant
@@ -60,7 +60,7 @@ public class KeywordDictionary {
 		}
 	}
 
-	public Tnames getKey(String s) {
+	private Tnames getKey(String s) {
 		return dict.get(s);
 	}
 }

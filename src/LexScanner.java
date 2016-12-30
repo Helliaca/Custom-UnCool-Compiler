@@ -16,20 +16,20 @@ public class LexScanner implements Lexer {
 	private KeywordDictionary kwd;      // Dictionary that contains all tokens with
 	                                    // their corresponding lexemes
 	private BufferedReader br;          // Used to read lines from file
-	final int BufSize = 4096;           // Size of buffer
+	private final int BufSize = 4096;           // Size of buffer
 	private String saved;               // Stores currently read lexeme
 	private char c;                     // Stores character right after 'saved'
 
 	// Contains all characters that indicate that a lexeme *might* have
 	// come to an end
-	static char[] separators = { '\r', '\0', '\n', '\t', '\f', ' ', '+', '-',
+	private static char[] separators = { '\r', '\0', '\n', '\t', '\f', ' ', '+', '-',
 			'*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']',
 			')', '"' };
 	// Contains all characters in between lexemes that can be safely ignored
-	static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
+	private static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
 	// Contains all Tokens that don't need to be returned by the
 	// nextToken-method
-	static Tnames[] doNotReturn = { Tnames.COMMENT };
+	private static Tnames[] doNotReturn = { Tnames.COMMENT };
 
 	public LexScanner(String file) {
 		kwd = new KeywordDictionary();
