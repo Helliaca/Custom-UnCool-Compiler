@@ -1,4 +1,4 @@
-public enum tnames {
+public enum Tnames {
 	//---- INLCUDES ALL POSSIBLE TOKEN-NAMES WITH THEIR RESPECTIVE LEXEME AND TYPE ----
 	
 	//Operators:
@@ -58,13 +58,13 @@ public enum tnames {
 	private final String type;
 	private final String fullName;
 	
-	private tnames(String lexeme, String type, String fullName) {
+	private Tnames(String lexeme, String type, String fullName) {
 		this.lexeme = lexeme;
 		this.type = type;
 		this.fullName = fullName;
 	}
 	
-	private tnames(String lexeme, String type) {
+	private Tnames(String lexeme, String type) {
 		this.lexeme = lexeme;
 		this.type = type;
 		this.fullName = this.toString();

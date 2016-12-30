@@ -29,7 +29,7 @@ public class LexScanner implements Lexer {
 	static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
 	// Contains all Tokens that don't need to be returned by the
 	// nextToken-method
-	static tnames[] doNotReturn = { tnames.COMMENT };
+	static Tnames[] doNotReturn = { Tnames.COMMENT };
 
 	public LexScanner(String file) {
 		kwd = new KeywordDictionary();
@@ -59,7 +59,7 @@ public class LexScanner implements Lexer {
 			c = next();
 
 		if (eof)
-			return new Token(tnames.EOF);
+			return new Token(Tnames.EOF);
 		startline = line;
 		// Once we have found a relevant character, scan until we hit a
 		// separator-character
@@ -69,14 +69,14 @@ public class LexScanner implements Lexer {
 		// --- SPECIAL CASES: ---
 		{
 			// If we found a minus-char, check if it is a comment
-			if (t.name == tnames.SUB && c == '-') {
+			if (t.name == Tnames.SUB && c == '-') {
 				skipUntil(new char[] { '\n' }); // If so, skip and discard the
 												// entire line
-				t = new Token(tnames.COMMENT);
+				t = new Token(Tnames.COMMENT);
 				c = next();
 			}
 			// If we found a quotation-mark, get the string literal
-			else if (t.name == tnames.QUOTATIONMARK) {
+			else if (t.name == Tnames.QUOTATIONMARK) {
 				if (c == '"') {
 					t = kwd.getToken("\"\"");
 				} // Case "" requires special treatment due to the nature of
@@ -89,7 +89,7 @@ public class LexScanner implements Lexer {
 				}
 			}
 			// If we found a '<', it could be <-, <= or <
-			else if (t.name == tnames.LT && kwd.getToken(saved + c).name != tnames.ERROR) {
+			else if (t.name == Tnames.LT && kwd.getToken(saved + c).name != Tnames.ERROR) {
 				c = saveAndNext(c);
 				t = kwd.getToken(saved);
 			}
@@ -98,7 +98,7 @@ public class LexScanner implements Lexer {
 		saved = ""; // Reset saved
 		if (arrayContains(doNotReturn, t.name))
 			t = nextToken(); // Get the next Token if we ought to ignore this one
-		if(t.name == tnames.ERROR)
+		if(t.name == Tnames.ERROR)
 			error(t.attr.toString());
 		return t;
 

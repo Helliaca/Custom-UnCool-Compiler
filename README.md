@@ -1,9 +1,9 @@
 # Custom-UnCool-Compiler
 
-## tnames / Tokennames
+## Tnames / Tokennames
 
-The tnames.java file contains an Enum that holds all information about a token, except its attribute.
-Each tnames object contains:
+The Tnames.java file contains an Enum that holds all information about a token, except its attribute.
+Each Tnames object contains:
 - A string that maps the object to a certain lexeme.
 - A string that indicates the type of the object (Symbol, Operator, Keyword, Type, etc.)
 - A string that indicates the the full name of the object (Add, Less, Equal, Assign, While, etc.)
@@ -11,12 +11,12 @@ Each tnames object contains:
 
 ## Token
 
-A token constitutes a tnames object and an optional attribute-object, which can be of any class that inherits Javas Object-class.
+A token constitutes a Tnames object and an optional attribute-object, which can be of any class that inherits Javas Object-class.
 
 
 ## KeywordDictionary
 
-Slightly misleading in its name, KeywordDictionary uses all the data declared in tnames.
+Slightly misleading in its name, KeywordDictionary uses all the data declared in Tnames.
 The key to the whole class is the getToken-method, which takes a string, and returns a Token corresponding to that string.
 
 

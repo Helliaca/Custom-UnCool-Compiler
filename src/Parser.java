@@ -20,15 +20,15 @@ public class Parser {
 		// Match class definitions
 		do {
 			klass(ast);
-		} while (matches(tnames.CLASS));
+		} while (matches(Tnames.CLASS));
 		// There are no more classes. The input has to end here.
-		match(tnames.EOF);
+		match(Tnames.EOF);
 		return ast;
 	}
 
 	// Quit with an error message. t1 and t2 are the expected tokens.
 	// t2 may be empty.
-	private void quit(tnames t1, tnames t2) {
+	private void quit(Tnames t1, Tnames t2) {
 		String out = "Error: Expected " + t1;
 
 		if (t2 != null) {
@@ -41,7 +41,7 @@ public class Parser {
 
 	// If the current token matches t, eat it and advance. If there is
 	// a mismatch, the method quits the program with an error message.
-	private String match(tnames t) {
+	private String match(Tnames t) {
 		Token c = current;
 		if (current.name == t) {
 			current = lex.nextToken();
@@ -53,7 +53,7 @@ public class Parser {
 	}
 
 	// Returns true if the current token matches t.
-	private boolean matches(tnames t) {
+	private boolean matches(Tnames t) {
 		if (current.name == t) {
 			return true;
 		}
@@ -63,39 +63,39 @@ public class Parser {
 	// Parses a class definition.
 	private void klass(AST ast) {
 		String klass = null;
-		String parent = null;
+		String parent = null; // TODO: initialize ot object?
 		Env.ClassInfo ci;
 		AST cast;
 
-		match(tnames.CLASS);
-		klass = match(tnames.TYPEID);
+		match(Tnames.CLASS);
+		klass = match(Tnames.TYPEID);
 
 		// Check for the "inherits Type" declaration.
-		if (matches(tnames.INHERITS)) {
-			match(tnames.INHERITS);
-			parent = match(tnames.TYPEID);
+		if (matches(Tnames.INHERITS)) {
+			match(Tnames.INHERITS);
+			parent = match(Tnames.TYPEID);
 		}
 		// Add the class definition to the environment.
 		ci = env.addClass(klass, parent);
 		cast = ast.addClass(ci);
 
-		match(tnames.BRACEOPEN);
+		match(Tnames.BRACEOPEN);
 		// Parse vars and methods.
-		while (matches(tnames.ID)) {
-			String n = match(tnames.ID);
-			if (matches(tnames.COLON)) {
+		while (matches(Tnames.ID)) {
+			String n = match(Tnames.ID);
+			if (matches(Tnames.COLON)) {
 				// have: Name :
 				var(cast, klass, n);
-			} else if (matches(tnames.BRACKETOPEN)) {
+			} else if (matches(Tnames.BRACKETOPEN)) {
 				// have: Name (
 				method(cast, klass, n);
 			} else {
-				quit(tnames.COLON, tnames.BRACKETOPEN);
+				quit(Tnames.COLON, Tnames.BRACKETOPEN);
 			}
 		}
 		// Classes end with };
-		match(tnames.BRACECLOSE);
-		match(tnames.SEMI);
+		match(Tnames.BRACECLOSE);
+		match(Tnames.SEMI);
 	}
 
 	// Parse a variable declaration. name is the name of
@@ -105,18 +105,18 @@ public class Parser {
 		Env.VarInfo vi;
 		AST vast;
 
-		match(tnames.COLON);
-		type = match(tnames.TYPEID);
+		match(Tnames.COLON);
+		type = match(Tnames.TYPEID);
 		// Add the variable to the environment.
 		vi = env.addVar(klass, name, type);
 		vast = ast.addVariable(vi);
 
-		if (matches(tnames.ASSIGN)) {
-			match(tnames.ASSIGN);
+		if (matches(Tnames.ASSIGN)) {
+			match(Tnames.ASSIGN);
 			expr(vast);
 		}
 
-		match(tnames.SEMI);
+		match(Tnames.SEMI);
 	}
 
 	// Parse a method declaration. name is the name of
@@ -128,24 +128,24 @@ public class Parser {
 		List<String> params = new ArrayList<>();
 
 		// method: name([arg : type, ...]) : type { expr };
-		match(tnames.BRACKETOPEN);
+		match(Tnames.BRACKETOPEN);
 		// have: name (
-		if (!matches(tnames.BRACKETCLOSE)) {
+		if (!matches(Tnames.BRACKETCLOSE)) {
 			parameters(params);
 		}
 		// have: name([arg:type, ..]
-		match(tnames.BRACKETCLOSE);
-		match(tnames.COLON);
+		match(Tnames.BRACKETCLOSE);
+		match(Tnames.COLON);
 		// The return type.
-		type = match(tnames.TYPEID);
+		type = match(Tnames.TYPEID);
 		mi = env.addMethod(klass, name, params, type);
 		mast = ast.addMethod(mi);
 
 		// have: name([arg:type, ..]) : Type
-		match(tnames.BRACEOPEN);
+		match(Tnames.BRACEOPEN);
 		expr(mast);
-		match(tnames.BRACECLOSE);
-		match(tnames.SEMI);
+		match(Tnames.BRACECLOSE);
+		match(Tnames.SEMI);
 
 	}
 
@@ -153,20 +153,20 @@ public class Parser {
 	private void parameters(List<String> params) {
 		String type;
 
-		match(tnames.ID);
-		match(tnames.COLON);
-		type = match(tnames.TYPEID);
+		match(Tnames.ID);
+		match(Tnames.COLON);
+		type = match(Tnames.TYPEID);
 		params.add(type);
-		if (matches(tnames.COMMA)) {
-			match(tnames.COMMA);
+		if (matches(Tnames.COMMA)) {
+			match(Tnames.COMMA);
 			parameters(params);
 		}
-		return;
+		return; // TODO: remove
 	}
 
 	// Parse an expression.
 	private void expr(AST ast) {
-		match(tnames.EXPR);
+		match(Tnames.EXPR);
 		ast.addExpr();
 	}
 }

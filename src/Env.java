@@ -122,7 +122,7 @@ public class Env {
 		// Check if the variables type exists.
 		vType = verifyType(type);
 		v = new VarInfo(name, vType);
-		k = verifyType(klass);
+		k = verifyType(klass); // TODO: remove
 		// Check if the variable is already defined.
 		checkVar(k, name);
 		k.vars.add(v);
@@ -166,7 +166,7 @@ public class Env {
 	}
 
 	// Add a method the environment.
-	Env.MethInfo addMethod(String klass, String name, List<String> params,
+	Env.MethInfo addMethod(String klass, String name,List<String> params,
 			String type) {
 		ClassInfo k;
 		ClassInfo retType;

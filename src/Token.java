@@ -1,14 +1,14 @@
 public class Token {
 
-	public tnames name;
+	public Tnames name;
 	public Object attr;
 
-	public Token(tnames name, Object attr) {
+	public Token(Tnames name, Object attr) {
 		this.name = name;
 		this.attr = attr;
 	}
 
-	public Token(tnames name) {
+	public Token(Tnames name) {
 		this.name = name;
 		this.attr = null;
 	}
