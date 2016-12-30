@@ -17,9 +17,8 @@ public class Token {
 	public String toString() {
 		if (attr != null)
 			return "<" + name.getType() + ", " + attr.toString() + ">";
-		if (name.getType() != "")
-			return "<" + name.getType() + ", " + name.getFullName() + ">";
-		return "<" + name.getFullName() + ">";
+		else
+			return "<" + name.getLexeme() + ">";
 	}
 
 }

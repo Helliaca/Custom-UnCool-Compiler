@@ -50,24 +50,16 @@ public enum Tnames {
 	STRINGLITERAL("", "LITERAL"),
 	ID("", "IDENTIFIER"),
 	TYPEID("", "TYPE"),
-	EOF("\0", "", "END OF FILE"),
+	EOF("EOF", "END OF FILE"),
 	ERROR("", "ERROR");
 	
 	
 	private final String lexeme;
 	private final String type;
-	private final String fullName;
-	
-	private Tnames(String lexeme, String type, String fullName) {
-		this.lexeme = lexeme;
-		this.type = type;
-		this.fullName = fullName;
-	}
-	
+
 	private Tnames(String lexeme, String type) {
 		this.lexeme = lexeme;
 		this.type = type;
-		this.fullName = this.toString();
 	}
 	
 	public String getLexeme() {
@@ -76,9 +68,5 @@ public enum Tnames {
 	
 	public String getType() {
 		return type;
-	}
-	
-	public String getFullName() {
-		return fullName;
 	}
 }	
