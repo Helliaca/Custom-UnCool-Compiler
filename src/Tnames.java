@@ -10,7 +10,8 @@ public enum Tnames {
 	LE("<=", "OPERATOR"),
 	ASSIGN("<-", "OPERATOR"),
 	EQ("=", "OPERATOR"),
-	
+	TILDE("~", "OPERATOR"),
+
 	//Keywords:
 	CLASS("class", "KEYWORD"),
 	INHERITS("inherits", "KEYWORD"),
