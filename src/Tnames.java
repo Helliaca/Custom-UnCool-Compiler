@@ -37,12 +37,9 @@ public enum Tnames {
 	COMMA(",", "SYMBOL"),
 	BRACKETOPEN("(", "SYMBOL"),
 	BRACKETCLOSE(")", "SYMBOL"),
-	LISTOPEN("[", "SYMBOL"),
-	LISTCLOSE("]", "SYMBOL"),
 	BRACEOPEN("{", "SYMBOL"),
 	BRACECLOSE("}", "SYMBOL"),
 	QUOTATIONMARK("\"", "SYMBOL"),
-	VOID("void", "SYMBOL"),
 	EXPR("&", "SYMBOL"),
 
 	//Other:
