@@ -27,7 +27,9 @@ public enum Tnames {
 	LET("let", "KEYWORD"),
 	ELSE("else", "KEYWORD"),
 	WHILE("while", "KEYWORD"),
-	
+	LOOP("loop", "Keyword"),
+	POOL("pool", "Keyword"),
+
 	//Symbols:
 	DOT(".", "SYMBOL"),
 	COLON(":", "SYMBOL"),
