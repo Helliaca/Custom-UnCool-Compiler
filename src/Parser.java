@@ -2,19 +2,21 @@ public class Parser {
 	
 	private LexScanner lex;
 	private Token current;
+	private Token next;
 	private Node root = new Node(pnames.PROGRAM);
 	
 	
 	public Parser(LexScanner lex) {
 		this.lex = lex;
-		current = lex.nextToken();
+		nextToken();
+		nextToken();
 		for(pnames p : pnames.values()) p.fixparts(); //Make sure pnames is fixed before running
 	}
 	
 	
 	//Parse full tree on Node 'root' and return it.
 	public Node parse() {
-		parse(pnames.PROGRAM.getProduction(current.name), root);
+		parse(pnames.PROGRAM.getProduction(current.name, next.name), root);
 		return root;
 	}
 	
@@ -26,7 +28,7 @@ public class Parser {
 		
 		for(int i=0; i<prod.length; i++) {
 			//If prod[i] is a production and not a terminal, parse it
-			if(!prod[i].isTnames()) parse(prod[i].getProduction(current.name), new Node(n, prod[i]));
+			if(!prod[i].isTnames()) parse(prod[i].getProduction(current.name, next.name), new Node(n, prod[i]));
 			
 			//Production is empty, insert EPSILON into tree at this point
 			else if(prod[i]==tnames.EPSILON) new Node(n, prod[i]); 
@@ -37,7 +39,7 @@ public class Parser {
 			//Token does correspond to the expected token, insert it into tree and get next one
 			else if(prod[i]==current.name) {
 				new Node(n, current.name);
-				current = lex.nextToken();
+				nextToken();
 				if(current.name==tnames.EOF) return true;
 			}
 		}
@@ -47,6 +49,11 @@ public class Parser {
 	private boolean error(String s) {
 		System.out.println("Error: "+s);
 		return false;
+	}
+	
+	private void nextToken() {
+		current = next;
+		next = lex.nextToken();
 	}
 
 }

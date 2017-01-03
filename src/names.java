@@ -1,17 +1,9 @@
 
 public interface names {
-	public default boolean isTnames() {
-		return false;
-	}
+	public boolean isTnames();
 
-	public default names[] getProduction(names n) {
-		System.out.println("This is not supposed to run.");
-		return null;
-	}
+	public names[] getProduction(tnames first, tnames follow);
 
-	public default tnames[] First(names[] prod) {
-		System.out.println("This is not supposed to run.");
-		return null;
-	}
+	public tnames[] First(names[] prod);
 
 }

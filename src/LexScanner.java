@@ -24,7 +24,7 @@ public class LexScanner implements Lexer {
 	// come to an end
 	static char[] separators = { '\r', '\0', '\n', '\t', '\f', ' ', '+', '-',
 			'*', '/', '=', '<', ':', ';', '.', ',', '(', '[', '{', '}', ']',
-			')', '"' };
+			')', '"' , '~'};
 	// Contains all characters in between lexemes that can be safely ignored
 	static char[] ignore = { ' ', '\t', '\n', '\r', '\f' };
 	// Contains all Tokens that don't need to be returned by the

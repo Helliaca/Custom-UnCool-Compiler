@@ -6,6 +6,7 @@ public enum tnames implements names {
 	SUB("-", "OPERATOR"),
 	DIV("/", "OPERATOR"),
 	MUL("*", "OPERATOR"),
+	COMPLEMENT("~", "OPERATOR"),
 	LT("<", "OPERATOR"),
 	LE("<=", "OPERATOR"),
 	ASSIGN("<-", "OPERATOR"),
@@ -26,6 +27,8 @@ public enum tnames implements names {
 	LET("let", "KEYWORD"),
 	ELSE("else", "KEYWORD"),
 	WHILE("while", "KEYWORD"),
+	LOOP("loop", "KEYWORD"),
+	POOL("pool", "KEYWORD"),
 	
 	//Types/Classes:
 	TYPEID("", "TYPE IDENTIFIER"),
@@ -54,7 +57,6 @@ public enum tnames implements names {
 	EOF("\0", "", "END OF FILE"),
 	ERROR("", "ERROR"),
 	
-	EXPR("&", "EXPR"),
 	EPSILON("", "EPSILON"),
 	TOKENS("", "TOKENLIST");
 	
@@ -95,5 +97,10 @@ public enum tnames implements names {
 	@Override
 	public tnames[] First(names[] prod) {
 		return new tnames[] {this};
+	}
+
+	@Override
+	public names[] getProduction(tnames f, tnames fo) {
+		return null;
 	}
 }	
