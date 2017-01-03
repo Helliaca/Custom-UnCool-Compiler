@@ -1,15 +1,22 @@
+import javax.xml.soap.Node;
 import java.util.ArrayList;
 
 public class AST {
 	enum NodeType {
-		ROOT, CLASS, METHOD, VARIABLE, EXPR
+		ROOT, CLASS, METHOD, VARIABLE, EXPR, IF, WHILE, BINOP, UNOP, LET, CONST, ID, STRING, BOOL, METHODCALL, NEW, SEQ
 	};
 
-	private NodeType t;
+	NodeType t;
+	Tnames token;
 	private Env.ClassInfo ci;
 	private Env.VarInfo vi;
 	private Env.MethInfo mi;
-	private ArrayList<AST> children;
+	int num;
+	boolean bool;
+	String str;
+	ArrayList<LetInfo> let;
+	ArrayList<AST> exprs;
+	ArrayList<AST> children;
 	private final String indent = "\t";
 
 	AST() {
@@ -17,6 +24,7 @@ public class AST {
 		ci = null;
 		vi = null;
 		mi = null;
+		exprs = new ArrayList<>();
 		children = new ArrayList<>();
 	}
 
@@ -44,9 +52,9 @@ public class AST {
 		return c;
 	}
 
-	AST addExpr() {
+	AST addIF() {
 		AST c = new AST();
-		c.t = NodeType.EXPR;
+		c.t = NodeType.IF;
 		children.add(c);
 		return c;
 	}
@@ -76,6 +84,58 @@ public class AST {
 			System.out.print(") : " + mi.type.name);
 		} else if (t == NodeType.EXPR) {
 			System.out.println("&");
+		} else if(t == NodeType.IF) {
+			System.out.println("If");
+			System.out.println("Test");
+			exprs.get(0)._print(ind + 1);
+			System.out.println("Then");
+			exprs.get(1)._print(ind + 1);
+			System.out.println("Else");
+			exprs.get(2)._print(ind + 1);
+		} else if (t == NodeType.WHILE) {
+			System.out.println("While");
+			System.out.println("Test");
+			exprs.get(0)._print(ind + 1);
+			System.out.println("Loop");
+			exprs.get(1)._print(ind + 1);
+		} else if (t == NodeType.BINOP) {
+			System.out.println("Binop " + token);
+			System.out.println("chldren: " + children.size()); // TODO: remove this line
+			for (AST ast : children) {
+				ast._print(ind + 1);
+			}
+		} else if (t == NodeType.UNOP) {
+			System.out.println("Unop " + token);
+			children.get(0)._print(ind + 1);
+		} else if (t == NodeType.LET) {
+			System.out.println("Let");
+			System.out.println("Declarations");
+			for (LetInfo li : let) {
+				System.out.println(li.name + " : " + li.type);
+				if (li.expr != null)
+					li.expr._print(ind + 1);
+			}
+			System.out.println("Body");
+			children.get(0)._print(ind + 1);
+		} else if (t == NodeType.CONST) {
+			System.out.println("Const " + num);
+		} else if (t == NodeType.ID) {
+			System.out.println("ID " + str);
+		} else if (t == NodeType.STRING) {
+			System.out.println("String " + str);
+		} else if (t == NodeType.BOOL) {
+			System.out.println("Bool " + bool);
+		} else if (t == NodeType.METHODCALL) {
+			System.out.println("Method call " + str);
+			for (AST ast : exprs) {
+				ast._print(ind + 1);
+			}
+		} else if (t == NodeType.NEW) {
+			System.out.println("new " + str);
+		} else if (t == NodeType.SEQ){
+				for (AST exp : exprs) {
+					exp._print(ind + 1);
+				}
 		} else {
 			System.out.println("ERROR");
 		}
