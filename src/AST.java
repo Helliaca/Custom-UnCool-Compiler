@@ -1,9 +1,9 @@
-import javax.xml.soap.Node;
 import java.util.ArrayList;
 
 public class AST {
 	enum NodeType {
-		ROOT, CLASS, METHOD, VARIABLE, EXPR, IF, WHILE, BINOP, UNOP, LET, CONST, ID, STRING, BOOL, METHODCALL, NEW, SEQ
+		ROOT, CLASS, METHOD, VARIABLE, EXPR, IF, WHILE, BINOP, UNOP, LET,
+		CONST, ID, STRING, BOOL, METHODCALL, NEW, SEQ
 	};
 
 	NodeType t;
@@ -52,13 +52,6 @@ public class AST {
 		return c;
 	}
 
-	AST addIF() {
-		AST c = new AST();
-		c.t = NodeType.IF;
-		children.add(c);
-		return c;
-	}
-
 	public void print() {
 		_print(0);
 	}
@@ -86,24 +79,15 @@ public class AST {
 			System.out.println("&");
 		} else if(t == NodeType.IF) {
 			System.out.println("If");
-			System.out.println("Test");
 			exprs.get(0)._print(ind + 1);
-			System.out.println("Then");
 			exprs.get(1)._print(ind + 1);
-			System.out.println("Else");
 			exprs.get(2)._print(ind + 1);
 		} else if (t == NodeType.WHILE) {
 			System.out.println("While");
-			System.out.println("Test");
 			exprs.get(0)._print(ind + 1);
-			System.out.println("Loop");
 			exprs.get(1)._print(ind + 1);
 		} else if (t == NodeType.BINOP) {
 			System.out.println("Binop " + token);
-			System.out.println("chldren: " + children.size()); // TODO: remove this line
-			for (AST ast : children) {
-				ast._print(ind + 1);
-			}
 		} else if (t == NodeType.UNOP) {
 			System.out.println("Unop " + token);
 			children.get(0)._print(ind + 1);
@@ -133,6 +117,7 @@ public class AST {
 		} else if (t == NodeType.NEW) {
 			System.out.println("new " + str);
 		} else if (t == NodeType.SEQ){
+			System.out.println("Sequence");
 				for (AST exp : exprs) {
 					exp._print(ind + 1);
 				}

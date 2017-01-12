@@ -48,17 +48,19 @@ class Env {
 
 	Env() {
 		classTable = new HashMap<>();
-		object = new ClassInfo("object", object);
+		object = new ClassInfo("Object", object);
 		ClassInfo io = new ClassInfo("IO", object);
 		ClassInfo Int = new ClassInfo("Int", object);
 		ClassInfo String = new ClassInfo("String", object);
 		ClassInfo bool = new ClassInfo("Bool", object);
+		ClassInfo self = new ClassInfo("SELF_TYPE", object);
 		// Add predefined classes.
 		classTable.put("Object", object);
 		classTable.put("IO", io);
 		classTable.put("Int", Int);
 		classTable.put("String", String);
 		classTable.put("Bool", bool);
+		classTable.put("SELF_TYPE", self);
 	}
 
 	// Prints msg and quits the program.

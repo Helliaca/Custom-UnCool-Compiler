@@ -22,7 +22,6 @@ public enum Tnames {
 	FI("fi", "KEYWORD", 0),
 	NOT("not", "KEYWORD", 200),
 	NEW("new", "KEYWORD", 0),
-	SELF_TYPE("SELF_TYPE", "KEYWORD", 0),
 	LET("let", "KEYWORD", 0),
 	ELSE("else", "KEYWORD", 0),
 	WHILE("while", "KEYWORD", 0),

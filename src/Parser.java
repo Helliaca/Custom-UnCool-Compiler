@@ -43,7 +43,6 @@ class Parser {
 	// a mismatch, the method quits the program with an error message.
 	private Object match(Tnames t) {
 		Token c = current;
-		System.out.println("Ate: " + c.name); // TODO: remove this line
 		if (current.name == t) {
 			current = lex.nextToken();
 			return c.attr;
@@ -75,7 +74,7 @@ class Parser {
 
 		// Check for the "inherits Type" declaration.
 		if (matches(Tnames.INHERITS)) {
-			match(Tnames.INHERITS);
+			advance();
 			parent = (String) match(Tnames.TYPEID);
 		}
 		// Add the class definition to the environment.
@@ -115,7 +114,7 @@ class Parser {
 		vast = ast.addVariable(vi);
 
 		if (matches(Tnames.ASSIGN)) {
-			match(Tnames.ASSIGN);
+			advance();
 			vast.children.add(expression(0));
 		}
 
@@ -155,7 +154,7 @@ class Parser {
 	// Parse the parameters list of a method.
 	private void parameters(List<String> params) {
 		String type;
-
+		// TODO: save the name of the parameters, too
 		match(Tnames.ID);
 		match(Tnames.COLON);
 		type = (String) match(Tnames.TYPEID);
@@ -168,10 +167,14 @@ class Parser {
 
 	// Parses the arguments of method calls.
 	private void arguments(AST ast){
+		// add an expression to the argument list
 		ast.exprs.add(expression(0));
+
 		if (matches(Tnames.BRACKETCLOSE)) {
-			match(Tnames.BRACKETCLOSE);
+			// we're done
+			advance();
 		} else {
+			// there are more arguments
 			match(Tnames.COMMA);
 			arguments(ast);
 		}
@@ -185,37 +188,46 @@ class Parser {
 		match(Tnames.COLON);
 		String type = (String) match(Tnames.TYPEID);
 
+		// Is there an assignment?
 		if (matches(Tnames.ASSIGN)) {
 			match(Tnames.ASSIGN);
 			expr = expression(0);
 		}
 		li = new LetInfo(name, type, expr);
 		ast.let.add(li);
+
 		if (!matches(Tnames.IN)) {
+			// there are more declarations
 			match(Tnames.COMMA);
 			declarations(ast);
 		}
 	}
 
+	// This function is used to parse an expression. The algorithm
+	// is based on an article by Fredrik Lundh
+	// (see: http://effbot.org/zone/simple-top-down-parsing.htm).
 	private AST expression(int bp) {
 		AST left = expr();
+
 		while (current.name.getBindingPower() > bp) {
 			AST ast = new AST();
 			ast.t = AST.NodeType.BINOP;
 			ast.token = current.name;
-			match(current.name);
-			ast.children.add(left); //TODO: add left.clone() instead of left
+			advance();
+			ast.children.add(left);
 			ast.children.add(expression(current.name.getBindingPower()));
 			left = ast;
 		}
 		return left;
 	}
 
+	// This method returns a subexpression.
 	private AST expr() {
 		AST ast = new AST();
 
 		switch (current.name) {
 			case IF:
+				// if expr then expr else expr fi
 				ast.t = AST.NodeType.IF;
 				match(Tnames.IF);
 				ast.exprs.add(expression(0));
@@ -226,6 +238,7 @@ class Parser {
 				match(Tnames.FI);
 				break;
 			case WHILE:
+				// while expr loop expr pool
 				ast.t = AST.NodeType.WHILE;
 				match(Tnames.WHILE);
 				ast.exprs.add(expression(0));
@@ -234,11 +247,13 @@ class Parser {
 				match(Tnames.POOL);
 				break;
 			case BRACKETOPEN:
+				// ( expr )
 				match(Tnames.BRACKETOPEN);
 				ast = expression(0);
 				match(Tnames.BRACKETCLOSE);
 				break;
 			case BRACEOPEN:
+				// { epxr; expr; ... }
 				match(Tnames.BRACEOPEN);
 				ast.t = AST.NodeType.SEQ;
 				ast.exprs.add(expression(0));
@@ -253,15 +268,19 @@ class Parser {
 				String name = (String) match(Tnames.ID);
 
 				if (matches(Tnames.BRACKETOPEN)) {
+					// It's a method call.
 					match(Tnames.BRACKETOPEN);
 					ast.t = AST.NodeType.METHODCALL;
 					ast.str = name;
 					if (matches(Tnames.BRACKETCLOSE)) {
-						match(Tnames.BRACKETCLOSE);
+						// If there are no arguments, return.
+						advance();
 						return ast;
 					}
+					// Parse the arguments.
 					arguments(ast);
 				} else {
+					// It's a variable.
 					ast.t = AST.NodeType.ID;
 					ast.str = name;
 				}
@@ -270,25 +289,29 @@ class Parser {
 			case CONSTANT:
 				ast.t = AST.NodeType.CONST;
 				ast.num = (int) current.attr;
-				match(Tnames.CONSTANT);
+				advance();
 				break;
 			case STRINGLITERAL:
 				ast.t = AST.NodeType.STRING;
 				ast.str = (String) current.attr;
-				match(current.name);
+				advance();
 				break;
 			case TRUE:
 				ast.t = AST.NodeType.BOOL;
 				ast.bool = true;
-				match(current.name);
+				advance();
 				break;
 			case FALSE:
 				ast.t = AST.NodeType.BOOL;
 				ast.bool = false;
-				match(current.name);
+				advance();
 				break;
 			case LET:
+				// let id : type [<- expr], ... in expr
 				match(Tnames.LET);
+				// Create a list to store the declarations.
+				ast.let = new ArrayList<>();
+				// Parse the declarations.
 				declarations(ast);
 				match(Tnames.IN);
 				ast.children.add(expression(0));
@@ -299,14 +322,16 @@ class Parser {
 			case TILDE:
 				ast.t = AST.NodeType.UNOP;
 				ast.token = current.name;
-				match(current.name);
+				advance();
 				ast.children.add(expression(current.name.getBindingPower()));
 				break;
 			case NEW:
+				// new type
 				ast.t = AST.NodeType.NEW;
 				ast.token = current.name;
-				match(Tnames.NEW);
+				advance();
 				ast.str = (String) match(Tnames.TYPEID);
+				break;
 			default:
 				quit(Tnames.EXPR, null);
 		}
