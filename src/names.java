@@ -1,8 +1,7 @@
-
 public interface names {
 	public boolean isTnames();
 
-	public names[] getProduction(tnames first, tnames follow);
+	public names[] getProduction(names n);
 
 	public tnames[] First(names[] prod);
 

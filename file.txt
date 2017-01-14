@@ -1,6 +1,12 @@
 class Main inherits IO {
    main(): Int {
-	1 < ~24+3*7
+	1+1*1+a
    };
+
+     out : Int <-		-- out is our 'output'.  It's values are the primes.
+    {
+      out_string("2 is trivially prime.\n");
+      2;
+    };
 };
 

@@ -59,20 +59,7 @@ class CellularAutomaton inherits IO {
     };
    
     evolve() : SELF_TYPE {
-        (let position : Int in
-        (let num : Int <- num_cells() in
-        (let temp : String in
-            {
-                while position < num loop
-                    {
-                        temp <- temp.concat(cell_at_next_evolution(position));
-                        position <- position + 1;
-                    }
-                pool;
-                population_map <- temp;
-                self;
-            }
-        ) ) )
+        1
     };
 };
 
@@ -81,17 +68,15 @@ class Main {
    
     main() : Object {
         {
-            cells <- (new CellularAutomaton).init("         X         ");
+            cells <- lmao.init("         X         ");
             cells.print();
-            (let countdown : Int <- 20 in
-                while 0 < countdown loop
-                    {
-                        cells.evolve();
-                        cells.print();
-                        countdown <- countdown - 1;
-                    }
-                pool
-            );
+            (while 0 < countdown loop
+            {
+                cells.evolve();
+                cells.print();
+                countdown <- countdown - 1;
+            }
+            pool);
             self;
         }
     };

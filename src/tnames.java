@@ -2,42 +2,40 @@ public enum tnames implements names {
 	//---- INLCUDES ALL POSSIBLE TOKEN-NAMES WITH THEIR RESPECTIVE LEXEME AND TYPE ----
 	
 	//Operators:
-	ADD("+", "OPERATOR"),
-	SUB("-", "OPERATOR"),
-	DIV("/", "OPERATOR"),
-	MUL("*", "OPERATOR"),
-	COMPLEMENT("~", "OPERATOR"),
-	LT("<", "OPERATOR"),
-	LE("<=", "OPERATOR"),
-	ASSIGN("<-", "OPERATOR"),
-	EQ("=", "OPERATOR"),
+	ADD("+", "BIN_OPERATOR"),
+	SUB("-", "BIN_OPERATOR"),
+	DIV("/", "BIN_OPERATOR"),
+	MUL("*", "BIN_OPERATOR"),
+	LT("<", "BIN_OPERATOR"),
+	LE("<=", "BIN_OPERATOR"),
+	ASSIGN("<-", "BIN_OPERATOR"),
+	EQ("=", "BIN_OPERATOR"),
+	COMMA(",", "BIN_OPERATOR"),
+	NOT("not", "SIN_OPERATOR"),
+	NEW("new", "SIN_OPERATOR"),
+	COMPLEMENT("~", "SIN_OPERATOR"),
+	ISVOID("isvoid", "SIN_OPERATOR"),
 	
 	//Keywords:
 	CLASS("class", "KEYWORD"),
 	INHERITS("inherits", "KEYWORD"),
 	IN("in", "KEYWORD"),
 	IF("if", "KEYWORD"),
-	ISVOID("isvoid", "KEYWORD"),
-	SELF("self", "KEYWORD"),
 	THEN("then", "KEYWORD"),
 	FI("fi", "KEYWORD"),
-	NOT("not", "KEYWORD"),
-	NEW("new", "KEYWORD"),
-	SELF_TYPE("SELF_TYPE", "KEYWORD"),
+	//SELF_TYPE("SELF_TYPE", "KEYWORD"),
 	LET("let", "KEYWORD"),
 	ELSE("else", "KEYWORD"),
 	WHILE("while", "KEYWORD"),
 	LOOP("loop", "KEYWORD"),
 	POOL("pool", "KEYWORD"),
-	
-	//Types/Classes:
-	TYPEID("", "TYPE IDENTIFIER"),
+	INT("INT", "KEYWORD"),
+	STR("STR", "KEYWORD"),
 	
 	//Symbols:
 	DOT(".", "SYMBOL"),
 	COLON(":", "SYMBOL"),
 	SEMI(";", "SYMBOL"),
-	COMMA(",", "SYMBOL"),
 	BRACKETOPEN("(", "SYMBOL"),
 	BRACKETCLOSE(")", "SYMBOL"),
 	LISTOPEN("[", "SYMBOL"),
@@ -48,16 +46,19 @@ public enum tnames implements names {
 	VOID("void", "SYMBOL"),
 	
 	//Other:
-	CONSTANT("", "CONST"),
-	TRUE("true", "CONST"),
-	FALSE("false", "CONST"),
+	CONSTANT("", "CONSTANT"),
+	TRUE("true", "CONSTANT"),
+	FALSE("false", "CONSTANT"),
 	COMMENT("", "COMMENT"),
-	STRINGLITERAL("", "LITERAL"),
+	STRINGLITERAL("", "CONSTANT"),
 	ID("", "IDENTIFIER"),
+	SELF("self", "IDENTIFIER"),
+	TYPEID("", "IDENTIFIER"),
 	EOF("\0", "", "END OF FILE"),
 	ERROR("", "ERROR"),
 	
 	EPSILON("", "EPSILON"),
+	$("$", "END OF LINE"),
 	TOKENS("", "TOKENLIST");
 	
 	
@@ -100,7 +101,7 @@ public enum tnames implements names {
 	}
 
 	@Override
-	public names[] getProduction(tnames f, tnames fo) {
+	public names[] getProduction(names fo) {
 		return null;
 	}
 }	
