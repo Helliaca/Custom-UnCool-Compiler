@@ -5,16 +5,15 @@ public class Node {
 	static int idcounter = 1;
 	private int id;
 	public int depth = 0;
-	private Node parent;
+	private Node parent=null;
 
-	tnames value=null;
-	pnames value_p=null;
+	private tnames value=null;
+	private pnames value_p=null;
 	ArrayList<Node> children = new ArrayList<Node>();;
 	boolean leaf;
-	Object attr=null;
+	private Object attr=null;
 	
 	public Node(names val) {
-		parent = null;
 		if(val.isTnames()){
 			this.value = (tnames) val;
 			leaf=true;
