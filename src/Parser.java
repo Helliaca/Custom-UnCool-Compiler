@@ -120,6 +120,9 @@ public class Parser {
 			//precedence does not exist, output error and return
 			else {
 				error("Could not parse " + stack.peek() + " with " + input[i]);
+				String s = "Stack: ";
+				for(Node tn : symbols) s+=" - " + tn.getValue().toString();
+				error(s);
 				return null;
 			}
 		}
@@ -148,6 +151,16 @@ public class Parser {
 		//Expression is an if-statement. Case: if E then E else E fi
 		else if(r==tnames.FI) {
 			reduce(stack, symbols, 7); //parent seven symbols to one EXPR-Node
+		}
+		
+		//Expression is a colon-statement. Case: TypeID : E
+		else if(r==tnames.COLON) {
+			reduce(stack, symbols, 3);
+		}
+		
+		//Expression is a let-statement. Case: let expr in expr
+		else if(r==tnames.IN) {
+			reduce(stack, symbols, 4);
 		}
 		
 		//Expression is a while-statement. Case: while E loop E pool
