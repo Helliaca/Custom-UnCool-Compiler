@@ -31,6 +31,11 @@ public class Node {
 		parent.addChild(this);
 	}
 	
+	public Node(tnames n, Object attr) {
+		this(n);
+		this.attr = attr;
+	}
+	
 	public Node(Token tok) {
 		this(tok.name);
 		this.attr = tok.attr;
@@ -77,6 +82,16 @@ public class Node {
 	}
 	
 
+	public void replace(Node n) {
+		if(!parent.children.contains(this)) {
+			System.out.println("Cant replace node in tree");
+		}
+		int i = parent.children.indexOf(this);
+		parent.children.set(i, n);
+		this.update();
+	}
+	
 	public Node getParent() {return parent;}
+	public Object getAttr() {return attr;}
 	public void setParent(Node p) {parent = p;}
 }

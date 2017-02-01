@@ -20,6 +20,7 @@ public class Main {
 		
 		Node root = new Parser(new LexScanner(filename)).parse();
 		System.out.println(root.toString());
+		tacGenerator gen = new tacGenerator(root);
 		/*
 		for(pnames p : pnames.values()) p.fixparts();
 		names[] x = pnames.EXPR.Follow(new names[] {tnames.ID, tnames.BRACKETOPEN, pnames.ARGS, tnames.BRACKETCLOSE});
