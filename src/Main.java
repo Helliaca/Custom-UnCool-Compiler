@@ -19,7 +19,7 @@ public class Main {
 
 		
 		Node root = new Parser(new LexScanner(filename)).parse();
-		System.out.println(root.toString()); //Print Parse-Tree
+		//System.out.println(root.toString()); //Print Parse-Tree
 		tacGenerator gen = new tacGenerator(root);
 		gen.printAll(); //Print Three-Adress-Code
 	}

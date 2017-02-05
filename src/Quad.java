@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 
 
 public class Quad {
@@ -19,8 +18,6 @@ public class Quad {
 		this.arg2=arg2;
 		qs.add(this);
 		inden = c_indentation;
-		
-		//System.out.println("new Quad : " + fullExpr());
 	}
 	
 	public Quad(SymbolTable st) {
@@ -34,9 +31,7 @@ public class Quad {
 		if(arg1!=null) this.arg1=arg1.getAttr().toString();
 		if(op!=null) this.op=((tnames)op.getValue()).getLexeme();
 		if(arg2!=null) this.arg2=arg2.getAttr().toString();
-		//this.arg2 = arg2.toString();
-		
-		//System.out.println("new Quad : " + fullExpr());
+
 		inden = c_indentation;
 		qs.add(this);
 	}

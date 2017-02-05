@@ -3,23 +3,25 @@ import java.util.ArrayList;
 
 public class tacGenerator {
 
-	private Node root;
 	private int tvarc = 0;
 	private int mvarc = 0;
 	private SymbolTable st = new SymbolTable();
 	
 	public tacGenerator(Node root) {
 		new Quad("#include <stdio.h>\n\n");
-		this.root = root;
 		generate(root);
 	}
 	
-	
+	/*
+	 * Generates Three-Address-Code as Quadruples into Quad.getAll() for a given Parse-tree.
+	 */
 	public void generate(Node c) {
 		if(!c.getValue().isTnames()) {
 			
+			//If we get an Expression, call a different method
 			if(c.getValue()==pnames.EXPR) genExpr(c);
 			
+			//Class definition
 			else if (c.getValue()==pnames.CLASSDEF) {
 				String classname = c.children.get(1).getAttr().toString();
 				//if class inheritance was implemented, it would go here
@@ -27,50 +29,58 @@ public class tacGenerator {
 				else for(int qi=0; qi<c.children.size(); qi++) {generate(c.children.get(qi));}
 			}
 			
+			//Feature definition
 			else if (c.getValue()==pnames.FEATUREDEF && c.children.size()>1) {
-				String featurename = c.children.get(0).getAttr().toString();
-				Node feature = c.children.get(1);
+				String featurename = c.children.get(0).getAttr().toString(); 	//Get features name
+				Node feature = c.children.get(1);								//Get feature-Node
 				
-				if(feature.children.get(0).getValue()==tnames.COLON) { // : type Expr' Featuredef
-					String featuretype = feature.children.get(1).getAttr().toString();
-					featuretype = fixType(featuretype);
+				 //Case: feature = ": type Expr' Featuredef"
+				if(feature.children.get(0).getValue()==tnames.COLON) {
+					String featuretype = fixType(feature.children.get(1).getAttr().toString());
 					Node aexpr = feature.children.get(2);
 					
-					if(aexpr.children.get(0).getValue()==tnames.ASSIGN) { // <- val;
+					if(aexpr.children.get(0).getValue()==tnames.ASSIGN) { //Case: Expr' = "<- val;"
 						genExpr(aexpr.children.get(1));
 						new Quad(featuretype + " " + featurename + " = " + aexpr.children.get(1).getAttr() + ";");
 					}
-					else new Quad(featuretype + " " + featurename + ";"); //;
-					generate(feature.children.get(3)); //gen next featuredef
+					else new Quad(featuretype + " " + featurename + ";"); //Case: Expr' = ";"
+					generate(feature.children.get(3)); //generate next feature definition
 				}
-				else {													// (Formal) : type {Expr} Featuredef
-					generate(feature.children.get(1)); //Formal
+				//Case: feature = "(Formal) : type {Expr} Featuredef"
+				else {
+					generate(feature.children.get(1)); //Generate Formal/Argument-List
 					Node formal = feature.children.get(1);
 					String featuretype = feature.children.get(4).getAttr().toString();
 					featuretype = fixType(featuretype);
 					if(featurename.equals("main")) new Quad("int main(" + formal.getAttr().toString() + ") {");
 					else new Quad(featuretype + " " + featurename + "(" + formal.getAttr().toString() + ") {");
-					Quad.incInd();
-					new Quad(st);
-					genExpr(feature.children.get(6));
-					st = new SymbolTable();
-					Quad.decInd();
-					if(featurename.equals("main")) new Quad("return 0;\n}");
-					else new Quad("}");
-					generate(feature.children.get(9)); //gen next featuredef
+					Quad.incInd(); 						//Set code-Indentation for code
+					new Quad(st);  						//Declare list of variables used by this function
+					genExpr(feature.children.get(6));	//Generate the Expression inside the function-body
+					simplify(); 						//Simplify code before clearing symbol-table
+					st = new SymbolTable();				//Create new symboltable, since we are outside the functions reach
+					if(featurename.equals("main")) new Quad("return 0;");
+					Quad.decInd();						//Set indentation back
+					new Quad("}");
+					generate(feature.children.get(9)); //generate next feature definition of this class
 				}
 			}
+			
+			//Formal definition / Argument-List
 			else if (c.getValue()==pnames.FORMAL) {
-				if(c.children.get(0).getValue()==tnames.EPSILON) {c.replace(new Node(tnames.FORMALS, ""));}
+				if(c.children.get(0).getValue()==tnames.EPSILON) {c.replace(new Node(tnames.FORMALS, ""));} //Empty. Function takes no args
 				else {
 					String id, type;
 					id = c.children.get(0).getAttr().toString();
 					type = c.children.get(2).getAttr().toString();
 					type = fixType(type);
-					generate(c.children.get(3));
+					generate(c.children.get(3)); //Next Argument
+					//Replace the current Node with a "Formals"-Node that has a list of Formals as its Attribute
 					c.replace(new Node(tnames.FORMALS, type + " " + id + c.children.get(3).getAttr().toString()));
 				}
 			}
+			
+			//Formal' definition. Similar to Formal, just with added ','
 			else if (c.getValue()==pnames.FORMAL_) {
 				if(c.children.get(0).getValue()==tnames.EPSILON) {c.replace(new Node(tnames.FORMALS, ""));}
 				else {
@@ -82,13 +92,17 @@ public class tacGenerator {
 					c.replace(new Node(tnames.FORMALS, ", " + type + " " + id + c.children.get(4).getAttr().toString()));
 				}
 			}
+			
+			//Different kind of Production. generate for all its children.
 			else for(int qi=0; qi<c.children.size(); qi++) {generate(c.children.get(qi));}
 		}
 	}
 	
-	
-	public void genExpr(Node n) {
-		//System.out.println("still here" + n);
+	/*
+	 * Generates Three-Address-Code for a given Expression into Quad.getAll().
+	 */
+	private void genExpr(Node n) {
+		//If we weren't given an Expression-Node, quit.
 		if(n.getValue()!=pnames.EXPR) {
 			System.out.println("Given arg is not expression:" + n + " of parent : " + n.getParent());
 			return;
@@ -96,30 +110,30 @@ public class tacGenerator {
 		
 		ArrayList<Node> ch = n.children;
 		
-		/*
+		/* Variable Declaration:
 		 * var : Type				INTO		Type var;
 		 * 
 		 * var : Type <- Expr		INTO		Type var;
 		 * 										var = Expr;
 		 */
-		if(n.children.size() > 1 && n.children.get(1).getValue()==tnames.COLON) { //cases var : E, where E -> type | type <- subexpr
+		if(ch.size() > 1 && ch.get(1).getTValue()==tnames.COLON) {
 			Node var, type, expr;
 			var=type=expr=null;
 			var = ch.get(0);
 			expr = ch.get(2);
 			type = expr.children.get(0);
-			st.put(var.getAttr().toString(), type.getAttr().toString());
+			st.put(var.getAttr().toString(), type.getAttr().toString()); //write var into table
 			
 			//If declared variable is also assigned
 			if(expr.children.size()>1){
 				type.replace(var); 	//turn variable declaration into normal var assign (aka var : E <- val ===> var <- val
-				genExpr(expr);
+				genExpr(expr);		//Generate 3ac for generic assign-operation. ("var = val;")
 			}
-			replace(n, tnames._PHE);
+			replace(n, tnames._PHE);//Replace current Node in parse-tree with placeholder node
 			return;
 		}
 		
-		/*
+		/* While Loop:
 		 * while x loop y pool		INTO		m1:		
 		 * 										t1 = x;
 		 * 										if(!t1) goto m2;
@@ -127,21 +141,21 @@ public class tacGenerator {
 		 * 										goto m1;
 		 * 										m2:
 		 */
-		if(n.children.size() > 1 && ch.get(0).getTValue()==tnames.WHILE) {
+		if(ch.size() > 1 && ch.get(0).getTValue()==tnames.WHILE) {
 			String m1 = newGotVar();
 			String m2 = newGotVar();
 			new Quad(m1+":");
-			genExpr(ch.get(1));
+			genExpr(ch.get(1)); //gen x
 			Node x = ch.get(1);
 			new Quad("if(!" + x.getAttr() + ") goto " + m2 + ";");
-			genExpr(ch.get(3));
+			genExpr(ch.get(3)); //gen y
 			new Quad("goto " + m1 + ";");
 			new Quad(m2+":");
 			replace(n, tnames._PHE);
 			return;
 		}
 		
-		/*
+		/* If Statement:
 		 * if x then y else z		INTO		t1 = x;
 		 * 										if(t1) goto m1;
 		 * 										z
@@ -165,7 +179,7 @@ public class tacGenerator {
 			return;
 		}
 		
-		/*
+		/* Function Call:
 		 * id(E)	INTO	id(E)
 		 */
 		if(ch.size()>2 && ch.get(0).getTValue()==tnames.ID && ch.get(1).getTValue()==tnames.BRACKETOPEN) {
@@ -192,10 +206,17 @@ public class tacGenerator {
 				return;
 			}
 			new Quad(ch.get(0).getAttr()+"("+ch.get(2).getAttr()+");");
+			replace(n, tnames._PHE);
 			return;
 		}
 		
-		 if(ch.size()>1 && ch.get(1).getTValue() == tnames.COMMA && n.marked) {
+		/* Marked Comma Statement:
+		 * Expr , Expr 		INTO	Expr , Expr
+		 * 
+		 * A marked comma statement means that the commas are relevant (such as function-arguments)
+		 * An unmarked comma statement (such as a series of declarations) will be further down 
+		 */
+		if(ch.size()>1 && ch.get(1).getTValue() == tnames.COMMA && n.marked) {
 			ch.get(0).mark();
 			ch.get(2).mark();
 			genExpr(ch.get(0));
@@ -204,18 +225,21 @@ public class tacGenerator {
 			return;
 		}
 		
+		//No 'special treatment' required. Just generate all subexpressions in order
 		while(!onlyTnames(n)) {
-			for(int qi=0; qi<n.children.size(); qi++) {
-				if(n.children.get(qi).getValue()==pnames.EXPR) genExpr(n.children.get(qi));
+			for(int qi=0; qi<ch.size(); qi++) {
+				if(ch.get(qi).getValue()==pnames.EXPR) genExpr(ch.get(qi));
 			}
 		}
 		
-		if(n.children.size()==1) { //cases const, id and stuff
+		//Cases: Constant, ID, etc.
+		if(ch.size()==1) {
 			if(ch.get(0).getTValue()==tnames.FALSE) n.replace(new Node(tnames._PHE, "0"));
 			else if(ch.get(0).getTValue()==tnames.TRUE) n.replace(new Node(tnames._PHE, "1"));
 			else if(ch.get(0).getTValue()==tnames.STRINGLITERAL) n.replace(new Node(tnames._PHE, "\""+n.children.get(0).getAttr().toString()+"\""));
-			else n.replace(n.children.get(0));
+			else n.replace(new Node(tnames._PHE, ch.get(0).getAttr()));
 		}
+		//Case: val <- Expr
 		else if(ch.get(1).getTValue() == tnames.ASSIGN) {
 			replace(n, tnames._PHE);
 			if(ch.get(2).getTValue()==tnames.IN_STRING) {
@@ -228,30 +252,30 @@ public class tacGenerator {
 			}
 			new Quad(ch.get(0).getAttr().toString(), ch.get(2).getAttr().toString(), "=", "");
 		}
+		//Case: Expr, Expr (unmarked), {Expr; Expr;...},
 		else if(ch.get(1).getTValue() == tnames.COMMA || ch.get(1).getTValue() == tnames.SEMI || ch.get(0).getTValue() == tnames.BRACEOPEN) {
 			replace(n, tnames._PHE);
 			return;
 		}
-		else if(((tnames)n.children.get(1).getValue()).getType()=="BIN_OPERATOR") { //cases binary operator
-			tnames op = ch.get(1).getTValue();
+		//Case: Expr op Expr
+		else if(ch.get(1).getTValue().getType()=="BIN_OPERATOR") {
 			Node rep = new Node(tnames.ID, newTmpVar("Int"));
 			n.replace(rep);
 			new Quad(rep, n.children.get(0), n.children.get(1), n.children.get(2));
 		}
-		else if(((tnames)n.children.get(0).getValue()).getType()=="SIN_OPERATOR") { //cases binary operator
-			if(ch.get(0).getTValue()==tnames.COMPLEMENT) {
-				Node rep = new Node(tnames.ID, newTmpVar("Int"));
-				n.replace(rep);
-				new Quad(rep.getAttr().toString(), " = ", "-"+ch.get(1).getAttr().toString(), "");
-				return;
-			}
-			else if(ch.get(0).getTValue()==tnames.NOT) {
-				Node rep = new Node(tnames.ID, newTmpVar("Int"));
-				n.replace(rep);
-				new Quad(rep.getAttr().toString(), " = ", "!"+ch.get(1).getAttr().toString(), "");
-				return;
-			}
+		//Case: op Expr
+		else if(ch.get(0).getTValue().getType()=="SIN_OPERATOR") {
+			Node rep = new Node(tnames.ID, newTmpVar("Int"));
+			if(ch.get(0).getTValue()==tnames.COMPLEMENT) 
+				new Quad(rep.getAttr().toString(), "-", ch.get(1).getAttr().toString(), "");
+			else if(ch.get(0).getTValue()==tnames.NOT)
+				new Quad(rep.getAttr().toString(), "!", ch.get(1).getAttr().toString(), "");
+			else 
+				new Quad(rep.getAttr().toString(), ch.get(0).getTValue().getLexeme(), ch.get(1).getAttr().toString(), "");
+			n.replace(rep);
+			return;
 		}
+		//Case: let Expr in Expr
 		else if(ch.get(0).getTValue()==tnames.LET) {
 			n.replace(new Node(tnames._PHE));
 		}
@@ -260,11 +284,13 @@ public class tacGenerator {
 		}
 	}
 	
+	//Replaces a given Node in Parse-tree with a new Node of type name
 	public void replace(Node n, tnames name) {
 		Node rep = new Node(name);
 		n.replace(rep);
 	}
 	
+	//Returns true if the given Node has only children of type tnames
 	public boolean onlyTnames(Node n) {
 		for(Node nc : n.children) {
 			if(!nc.getValue().isTnames()) return false;
@@ -272,18 +298,25 @@ public class tacGenerator {
 		return true;
 	}
 	
-	
+	//Returns new temporary variable-name
 	public String newTmpVar(String type) {
 		String newvar = "_t" + (++tvarc);
 		st.put(newvar, type);
 		return newvar;
 	}
 	
-	
+	//Returns new jump-point name
 	public String newGotVar() {
 		return "_m" + (++mvarc);
 	}
 	
+	/* Removes all unneeded copy-operations. Aka:
+	 * Transforms all
+	 * _tx = a op b;
+	 * c = _tx;
+	 * INTO
+	 * c = a op b;
+	 */
 	public void simplify() {
 		ArrayList<Quad> list = Quad.getAll();
 		for(int i=1; i<list.size(); i++) {
@@ -297,14 +330,14 @@ public class tacGenerator {
 		}
 	}
 	
+	//Prints all Quadruples in order
 	public void printAll() {
-		simplify();
-		System.out.println("--");
 		for(Quad q : Quad.getAll()) {
 			System.out.println(q.fullExpr());
 		}
 	}
 	
+	//Keeps standard-types from UnCool Int, Bool and String in mind.
 	public String fixType(String feat) {
 		if(feat.equals("Int") || feat.equals("Bool")) return "int";
 		if(feat.equals("String")) return "char *";
