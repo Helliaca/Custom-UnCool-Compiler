@@ -59,6 +59,11 @@ public enum tnames implements names {
 	
 	EPSILON("", "EPSILON"),
 	$("$", "END OF LINE"),
+	_PHE("", "PHE"),
+	IN_STRING("", "IN_STRING"),
+	IN_INT("", "IN_INT"),
+	FORMALS("", "FORMALS"),
+	PRODUCTION("", "P"),
 	TOKENS("", "TOKENLIST");
 	
 	

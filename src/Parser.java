@@ -70,9 +70,9 @@ public class Parser {
 			else if(prod[i]==current.name) {
 				new Node(n, current);
 				nextToken();
-				if(current.name==tnames.EOF) return true;
 			}
 		}
+		if(n.getValue()==pnames.PROGRAM && current.name!=tnames.EOF) return error("Could not parse remaining Tokens from " + current);
 		return true;
 	}
 	

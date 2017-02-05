@@ -12,6 +12,7 @@ public class Node {
 	ArrayList<Node> children = new ArrayList<Node>();;
 	boolean leaf;
 	private Object attr=null;
+	public boolean marked=false;
 	
 	public Node(names val) {
 		if(val.isTnames()){
@@ -51,6 +52,11 @@ public class Node {
 		return value_p;
 	}
 	
+	public tnames getTValue() {
+		if(value==null) return tnames.PRODUCTION;
+		return (tnames)getValue();
+	}
+	
 	public Node addChild(Node n) {
 		if(n==null) return null;
 		if(!this.leaf) {
@@ -81,6 +87,10 @@ public class Node {
 		return s;
 	}
 	
+	public void mark () {
+		marked = true;
+	}
+	
 
 	public void replace(Node n) {
 		if(!parent.children.contains(this)) {
@@ -92,6 +102,9 @@ public class Node {
 	}
 	
 	public Node getParent() {return parent;}
-	public Object getAttr() {return attr;}
+	public Object getAttr() {
+		if(attr==null) return "";
+		return attr;
+	}
 	public void setParent(Node p) {parent = p;}
 }
