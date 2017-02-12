@@ -19,7 +19,7 @@ public class tacGenerator {
 		if(!c.getValue().isTnames()) {
 			
 			//If we get an Expression, call a different method
-			if(c.getValue()==pnames.EXPR) genExpr(c);
+			if(c.getValue()==pnames.EXPR) genExpr(c, false);
 			
 			//Class definition
 			else if (c.getValue()==pnames.CLASSDEF) {
@@ -40,7 +40,7 @@ public class tacGenerator {
 					Node aexpr = feature.children.get(2);
 					
 					if(aexpr.children.get(0).getValue()==tnames.ASSIGN) { //Case: Expr' = "<- val;"
-						genExpr(aexpr.children.get(1));
+						genExpr(aexpr.children.get(1), true);
 						new Quad(featuretype + " " + featurename + " = " + aexpr.children.get(1).getAttr() + ";");
 					}
 					else new Quad(featuretype + " " + featurename + ";"); //Case: Expr' = ";"
@@ -56,10 +56,11 @@ public class tacGenerator {
 					else new Quad(featuretype + " " + featurename + "(" + formal.getAttr().toString() + ") {");
 					Quad.incInd(); 						//Set code-Indentation for code
 					new Quad(st);  						//Declare list of variables used by this function
-					genExpr(feature.children.get(6));	//Generate the Expression inside the function-body
+					genExpr(feature.children.get(6), !featurename.equals("main"));	//Generate the Expression inside the function-body
 					simplify(); 						//Simplify code before clearing symbol-table
 					st = new SymbolTable();				//Create new symboltable, since we are outside the functions reach
 					if(featurename.equals("main")) new Quad("return 0;");
+					else new Quad("return " + feature.children.get(6).getAttr().toString() + ";");
 					Quad.decInd();						//Set indentation back
 					new Quad("}");
 					generate(feature.children.get(9)); //generate next feature definition of this class
@@ -68,7 +69,7 @@ public class tacGenerator {
 			
 			//Formal definition / Argument-List
 			else if (c.getValue()==pnames.FORMAL) {
-				if(c.children.get(0).getValue()==tnames.EPSILON) {c.replace(new Node(tnames.FORMALS, ""));} //Empty. Function takes no args
+				if(c.children.get(0).getValue()==tnames.EPSILON) {replace(c, tnames.FORMALS, "", true);} //Empty. Function takes no args
 				else {
 					String id, type;
 					id = c.children.get(0).getAttr().toString();
@@ -76,20 +77,20 @@ public class tacGenerator {
 					type = fixType(type);
 					generate(c.children.get(3)); //Next Argument
 					//Replace the current Node with a "Formals"-Node that has a list of Formals as its Attribute
-					c.replace(new Node(tnames.FORMALS, type + " " + id + c.children.get(3).getAttr().toString()));
+					replace(c, tnames.FORMALS, type + " " + id + c.children.get(3).getAttr().toString(), true);
 				}
 			}
 			
 			//Formal' definition. Similar to Formal, just with added ','
 			else if (c.getValue()==pnames.FORMAL_) {
-				if(c.children.get(0).getValue()==tnames.EPSILON) {c.replace(new Node(tnames.FORMALS, ""));}
+				if(c.children.get(0).getValue()==tnames.EPSILON) {replace(c, tnames.FORMALS, "", true);}
 				else {
 					String id, type;
 					id = c.children.get(1).getAttr().toString();
 					type = c.children.get(3).getAttr().toString();
 					type = fixType(type);
 					generate(c.children.get(4));
-					c.replace(new Node(tnames.FORMALS, ", " + type + " " + id + c.children.get(4).getAttr().toString()));
+					replace(c, tnames.FORMALS, ", " + type + " " + id + c.children.get(4).getAttr().toString(), true);
 				}
 			}
 			
@@ -101,7 +102,8 @@ public class tacGenerator {
 	/*
 	 * Generates Three-Address-Code for a given Expression into Quad.getAll().
 	 */
-	private void genExpr(Node n) {
+	private void genExpr(Node n, boolean needVal) {
+		//System.out.println("NEED : " + needVal + " ON " + n);
 		//If we weren't given an Expression-Node, quit.
 		if(n.getValue()!=pnames.EXPR) {
 			System.out.println("Given arg is not expression:" + n + " of parent : " + n.getParent());
@@ -127,9 +129,44 @@ public class tacGenerator {
 			//If declared variable is also assigned
 			if(expr.children.size()>1){
 				type.replace(var); 	//turn variable declaration into normal var assign (aka var : E <- val ===> var <- val
-				genExpr(expr);		//Generate 3ac for generic assign-operation. ("var = val;")
+				genExpr(expr, false);		//Generate 3ac for generic assign-operation. ("var = val;")
 			}
-			replace(n, tnames._PHE);//Replace current Node in parse-tree with placeholder node
+			replace(n, tnames._PHE, var.getAttr(), needVal); //Replace current Node in parse-tree with placeholder node
+			return;
+		}
+		
+		/* Let Statement:
+		 * let Expr in Expr		INTO    Expr Expr 
+		 */
+		else if(ch.size() > 1 && ch.get(0).getTValue()==tnames.LET) {
+			genExpr(ch.get(1), false);
+			genExpr(ch.get(3), needVal);
+			replace(n, tnames._PHE, ch.get(3).getAttr(), needVal);
+			return;
+		}
+		
+		/* Braces:
+		 * {Expr} INTO Expr
+		 */
+		else if(ch.size() >= 3 && ch.get(0).getTValue() == tnames.BRACEOPEN) {
+			genExpr(ch.get(1), needVal);
+			replace(n, tnames._PHE, ch.get(1).getAttr(), needVal);
+			return;
+		}
+		
+		/* Expr-List
+		 * Expr; Expr;...,  INTO Expr Expr ...
+		 */
+		else if(ch.size() > 1 && ch.get(1).getTValue() == tnames.SEMI) {
+			if(ch.size()>=3) {
+				genExpr(ch.get(0), false);
+				genExpr(ch.get(2), needVal);
+				replace(n, tnames._PHE, ch.get(2).getAttr(), needVal);
+			}
+			else {
+				genExpr(ch.get(0), needVal);
+				replace(n, tnames._PHE, ch.get(0).getAttr(), needVal);
+			}
 			return;
 		}
 		
@@ -145,12 +182,13 @@ public class tacGenerator {
 			String m1 = newGotVar();
 			String m2 = newGotVar();
 			new Quad(m1+":");
-			genExpr(ch.get(1)); //gen x
+			genExpr(ch.get(1), true); //gen x
 			Node x = ch.get(1);
 			new Quad("if(!" + x.getAttr() + ") goto " + m2 + ";");
-			genExpr(ch.get(3)); //gen y
+			genExpr(ch.get(3), false); //gen y
 			new Quad("goto " + m1 + ";");
 			new Quad(m2+":");
+			if(needVal) System.out.println("While has no return value!");
 			replace(n, tnames._PHE);
 			return;
 		}
@@ -167,14 +205,15 @@ public class tacGenerator {
 		if(ch.size() > 1 && ch.get(0).getTValue()==tnames.IF) {
 			String m1 = newGotVar();
 			String m2 = newGotVar();
-			genExpr(ch.get(1)); //t1=x
+			genExpr(ch.get(1), true); //t1=x
 			Node t1 = ch.get(1);
 			new Quad("if(" + t1.getAttr() + ") goto " + m1 + ";");
-			genExpr(ch.get(5)); // z
+			genExpr(ch.get(5), needVal); // z
 			new Quad("goto " + m2 + ";");
 			new Quad(m1+":");
-			genExpr(ch.get(3)); // y
+			genExpr(ch.get(3), needVal); // y
 			new Quad(m2+":");
+			if(needVal) System.out.println("Function cant return if statement.");
 			replace(n,tnames._PHE);
 			return;
 		}
@@ -185,15 +224,28 @@ public class tacGenerator {
 		if(ch.size()>2 && ch.get(0).getTValue()==tnames.ID && ch.get(1).getTValue()==tnames.BRACKETOPEN) {
 			if(ch.get(2).getValue()==pnames.EXPR) {
 				ch.get(2).mark();
-				genExpr(ch.get(2)); //GenExpr if there are arguments to the method
+				genExpr(ch.get(2), true); //GenExpr if there are arguments to the method
 			}
 			if(ch.get(0).getAttr().equals("out_string")) {
-				new Quad("printf(\"%s\\n\", " + ch.get(2).getAttr() + ");");
+				new Quad("printf(");
+				new Quad("\"%s\\n\", ");
+				new Quad(ch.get(2).getAttr() + ");");
 				replace(n, tnames._PHE);
+				if(needVal) System.out.println("Function cant return out_string.");
 				return;
 			}
 			else if (ch.get(0).getAttr().equals("out_int")) {
-				new Quad("printf(\"%d\\n\", " + ch.get(2).getAttr() + ");");
+				new Quad("printf(");
+				new Quad("\"%d\\n\", ");
+				new Quad(ch.get(2).getAttr() + ");");
+				if(needVal) System.out.println("Function cant return out_int.");
+				replace(n, tnames._PHE);
+				return;
+			}
+			else if (ch.get(0).getAttr().equals("out_nl")) {
+				new Quad("printf(");
+				new Quad("\"\\n\");");
+				if(needVal) System.out.println("Function cant return out_nl.");
 				replace(n, tnames._PHE);
 				return;
 			}
@@ -205,8 +257,15 @@ public class tacGenerator {
 				replace(n, tnames.IN_INT);
 				return;
 			}
-			new Quad(ch.get(0).getAttr()+"("+ch.get(2).getAttr()+");");
-			replace(n, tnames._PHE);
+			if(needVal) {
+				Node rep = new Node(tnames.ID, newTmpVar("Int"));
+				new Quad(rep.getAttr().toString(), ch.get(0).getAttr()+"(\n   "+ch.get(2).getAttr()+")", "=", "");
+				n.replace(rep);
+			}
+			else {
+				new Quad(ch.get(0).getAttr()+"(\n   "+ch.get(2).getAttr()+");");
+				replace(n, tnames._PHE);
+			}
 			return;
 		}
 		
@@ -219,49 +278,58 @@ public class tacGenerator {
 		if(ch.size()>1 && ch.get(1).getTValue() == tnames.COMMA && n.marked) {
 			ch.get(0).mark();
 			ch.get(2).mark();
-			genExpr(ch.get(0));
-			genExpr(ch.get(2));
-			n.replace(new Node(tnames._PHE, ch.get(0).getAttr().toString() + ", "+ch.get(2).getAttr().toString()));
+			genExpr(ch.get(0), true);
+			genExpr(ch.get(2), true);
+			replace(n, tnames._PHE, "\n"+ch.get(0).getAttr().toString() + ", \n"+ch.get(2).getAttr().toString(), true);
 			return;
 		}
 		
 		//No 'special treatment' required. Just generate all subexpressions in order
 		while(!onlyTnames(n)) {
 			for(int qi=0; qi<ch.size(); qi++) {
-				if(ch.get(qi).getValue()==pnames.EXPR) genExpr(ch.get(qi));
+				if(ch.get(qi).getValue()==pnames.EXPR) genExpr(ch.get(qi), false);
 			}
 		}
 		
 		//Cases: Constant, ID, etc.
 		if(ch.size()==1) {
-			if(ch.get(0).getTValue()==tnames.FALSE) n.replace(new Node(tnames._PHE, "0"));
-			else if(ch.get(0).getTValue()==tnames.TRUE) n.replace(new Node(tnames._PHE, "1"));
-			else if(ch.get(0).getTValue()==tnames.STRINGLITERAL) n.replace(new Node(tnames._PHE, "\""+n.children.get(0).getAttr().toString()+"\""));
-			else n.replace(new Node(tnames._PHE, ch.get(0).getAttr()));
+			if(ch.get(0).getTValue()==tnames.FALSE) replace(n, tnames._PHE, "0", true);
+			else if(ch.get(0).getTValue()==tnames.TRUE) replace(n, tnames._PHE, "1", true);
+			else if(ch.get(0).getTValue()==tnames.STRINGLITERAL) replace(n, tnames._PHE, "\""+n.children.get(0).getAttr().toString()+"\"", true);
+			else replace(n, tnames._PHE, ch.get(0).getAttr(), true);
 		}
 		//Case: val <- Expr
 		else if(ch.get(1).getTValue() == tnames.ASSIGN) {
 			replace(n, tnames._PHE);
+			if(needVal) System.out.println("Function cant return assign statement.");
 			if(ch.get(2).getTValue()==tnames.IN_STRING) {
-				new Quad("scanf(\"%s\", &" + ch.get(0).getAttr() + ");");
+				new Quad("scanf(");
+				new Quad("\"%s\", ");
+				new Quad("&" + ch.get(0).getAttr() + ");");
 				return;
 			}
 			else if(ch.get(2).getTValue()==tnames.IN_INT) {
-				new Quad("scanf(\"%i\", &" + ch.get(0).getAttr() + ");");
+				new Quad("scanf(");
+				new Quad("\"%i\", ");
+				new Quad("&" + ch.get(0).getAttr() + ");");
 				return;
 			}
 			new Quad(ch.get(0).getAttr().toString(), ch.get(2).getAttr().toString(), "=", "");
+			return;
 		}
-		//Case: Expr, Expr (unmarked), {Expr; Expr;...},
-		else if(ch.get(1).getTValue() == tnames.COMMA || ch.get(1).getTValue() == tnames.SEMI || ch.get(0).getTValue() == tnames.BRACEOPEN) {
+		//Case: Expr, Expr (unmarked)
+		else if(ch.get(1).getTValue() == tnames.COMMA) {
 			replace(n, tnames._PHE);
+			System.out.println("Function cant return comma statement.");
 			return;
 		}
 		//Case: Expr op Expr
 		else if(ch.get(1).getTValue().getType()=="BIN_OPERATOR") {
 			Node rep = new Node(tnames.ID, newTmpVar("Int"));
 			n.replace(rep);
-			new Quad(rep, n.children.get(0), n.children.get(1), n.children.get(2));
+			if(n.children.get(1).getTValue()==tnames.EQ) new Quad(rep.getAttr().toString(), n.children.get(0).getAttr().toString(), "==", n.children.get(2).getAttr().toString());
+			else new Quad(rep, n.children.get(0), n.children.get(1), n.children.get(2));
+			return;
 		}
 		//Case: op Expr
 		else if(ch.get(0).getTValue().getType()=="SIN_OPERATOR") {
@@ -275,10 +343,6 @@ public class tacGenerator {
 			n.replace(rep);
 			return;
 		}
-		//Case: let Expr in Expr
-		else if(ch.get(0).getTValue()==tnames.LET) {
-			n.replace(new Node(tnames._PHE));
-		}
 		else {
 			System.out.println("Could not genExpr for " + n);
 		}
@@ -287,6 +351,20 @@ public class tacGenerator {
 	//Replaces a given Node in Parse-tree with a new Node of type name
 	public void replace(Node n, tnames name) {
 		Node rep = new Node(name);
+		n.replace(rep);
+	}
+	
+	//Replaces a given Node in Parse-tree with a new Node of type name + attribute
+	public void replace(Node n, tnames name, Object attr) {
+		Node rep = new Node(name, attr);
+		n.replace(rep);
+	}
+		
+	//Replaces a given Node in Parse-tree with a new Node of type name + attribute
+	public void replace(Node n, tnames name, Object attr, boolean needVal) {
+		Node rep;
+		if(needVal) rep = new Node(name, attr);
+		else rep = new Node(name);
 		n.replace(rep);
 	}
 	
@@ -343,4 +421,5 @@ public class tacGenerator {
 		if(feat.equals("String")) return "char *";
 		return feat;
 	}
+	
 }

@@ -46,9 +46,9 @@ public class Quad {
 		String indent = "";
 		for(int i=0; i<inden; i++) indent += "   ";
 		if(st!=null) return indent + st.toString();
-		if(this.op.equals("=") && this.arg2.equals("")) return indent+this.res+" = "+this.arg1+";";
-		if(arg1.equals("") && op.equals("") && arg2.equals("")) return indent+res;
-		if (res.equals("")) return indent+this.arg1 + " " + this.op + " " + this.arg2 + ";";
+		else if(this.op.equals("=") && this.arg2.equals("")) return indent+this.res+" = "+this.arg1+";";
+		else if(arg1.equals("") && op.equals("") && arg2.equals("")) return indent+res;
+		else if (res.equals("")) return indent+this.arg1 + " " + this.op + " " + this.arg2 + ";";
 		return indent+this.res + " = " + this.arg1 + " " + this.op + " " + this.arg2 + ";";
 	}
 	
