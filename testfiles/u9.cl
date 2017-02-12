@@ -19,8 +19,5 @@ class Main inherits IO {
         pool;
         }
     };
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 52b174b57c8412e668feba37586bbdf3b59cbd2a
+
