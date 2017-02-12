@@ -320,7 +320,7 @@ public class tacGenerator {
 		//Case: Expr, Expr (unmarked)
 		else if(ch.get(1).getTValue() == tnames.COMMA) {
 			replace(n, tnames._PHE);
-			System.out.println("Function cant return comma statement.");
+			if(needVal) System.out.println("Function cant return comma statement.");
 			return;
 		}
 		//Case: Expr op Expr
