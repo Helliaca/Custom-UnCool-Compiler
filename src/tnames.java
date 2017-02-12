@@ -23,7 +23,6 @@ public enum tnames implements names {
 	IF("if", "KEYWORD"),
 	THEN("then", "KEYWORD"),
 	FI("fi", "KEYWORD"),
-	//SELF_TYPE("SELF_TYPE", "KEYWORD"),
 	LET("let", "KEYWORD"),
 	ELSE("else", "KEYWORD"),
 	WHILE("while", "KEYWORD"),
@@ -38,12 +37,9 @@ public enum tnames implements names {
 	SEMI(";", "SYMBOL"),
 	BRACKETOPEN("(", "SYMBOL"),
 	BRACKETCLOSE(")", "SYMBOL"),
-	LISTOPEN("[", "SYMBOL"),
-	LISTCLOSE("]", "SYMBOL"),
 	BRACEOPEN("{", "SYMBOL"),
 	BRACECLOSE("}", "SYMBOL"),
 	QUOTATIONMARK("\"", "SYMBOL"),
-	VOID("void", "SYMBOL"),
 	
 	//Other:
 	CONSTANT("", "CONSTANT"),
