@@ -11,7 +11,7 @@ class Main inherits IO {
         let n: Int in
         {
         out_string("Primzahltest fuer Zahl (>1):");
-        n = in_int();
+        n <- in_int();
         out_nl();
         if prim(n) then
             out_string("Primzahl")
